@@ -8,6 +8,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import FastfoodIcon from '@mui/icons-material/Fastfood';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useAuth } from '../../hooks/useAuth';
+import { getUsuario } from '../../firebase/firestore';
 
 const MainLayout = () => {
   const { currentUser, logout } = useAuth();
@@ -48,7 +49,14 @@ const MainLayout = () => {
   return (
     <>
       <AppBar position="static" color="primary">
-        <Toolbar>
+        <Toolbar
+          sx={{
+            
+            display: 'flex',
+            justifyContent: 'space-between'
+          }}
+        >
+          <Typography  variant="h6" component="div" >
           <IconButton
             size="large"
             edge="start"
@@ -61,8 +69,7 @@ const MainLayout = () => {
           </IconButton>
           
           <FastfoodIcon sx={{ mr: 1 }} />
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            App de Pedidos Colectivos
+            Pedidos Desayunos
           </Typography>
           
           {currentUser && (

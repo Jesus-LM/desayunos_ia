@@ -143,27 +143,29 @@ const OrderDetail = () => {
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>       
          <IconButton 
             aria-label="atras" 
-            color="primary"
-            fontSize="large"
+            color="primary"       
             onClick={() => navigate('/orders')}>
-            <ArrowBackIcon />         
+            <ArrowBackIcon fontSize="large" />         
         </IconButton>
+      </Box>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Typography variant="h4" component="h1">
             {order?.name}
           </Typography>
         </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <IconButton 
           aria-label="resumen" 
           color="primary"
-          fontSize="large"
           onClick={toggleSummary}
         >
-            <ReceiptLongIcon />
+            <ReceiptLongIcon fontSize="large" />
         </IconButton>
       </Box>
+    </Box>
 
       <Card sx={{ mb: 4 }}>
         <CardContent>
@@ -192,11 +194,10 @@ const OrderDetail = () => {
 
       <Box sx={{ width: '100%' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={activeTab} onChange={handleTabChange} aria-label="categorías de productos">
+          <Tabs value={activeTab} onChange={handleTabChange} centered aria-label="categorías de productos">
             <Tab label="Comida" />
             <Tab label="Bebida" />
             <Tab label="Favoritos" />
-            <Tab label="Mi Pedido" />
           </Tabs>
         </Box>
         
@@ -222,11 +223,12 @@ const OrderDetail = () => {
               selectedProducts={selectedProducts}
             />
           )}
-          {activeTab === 3 && (
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                Mis productos seleccionados
+            <Box >
+              <Typography fontWeight="bold" color="primary" align="center" variant="h5" gutterBottom>
+                Mi Selección
               </Typography>
+              <Divider sx={{ my: 2 }} />
+            
               {userProductsInOrder.length > 0 ? (
                 <List>
                   {userProductsInOrder.map((product, index) => (
@@ -244,7 +246,7 @@ const OrderDetail = () => {
                 </Typography>
               )}
             </Box>
-          )}
+          
         </Box>
         
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
@@ -268,7 +270,9 @@ const OrderDetail = () => {
         maxWidth="md"
       >
         <DialogTitle>
-          Resumen del Pedido: {order?.name}
+          <Typography fontSize="2rem" fontWeight="bold" color="primary" align="center">
+            {order?.name}
+           </Typography>
         </DialogTitle>
         <DialogContent dividers>
           <OrderSummary order={order} />

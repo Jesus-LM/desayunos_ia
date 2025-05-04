@@ -4,6 +4,7 @@ import {
   TextField, InputAdornment, Box, CircularProgress, 
   Checkbox, FormControlLabel, Chip
 } from '@mui/material';
+import LunchDiningIcon from '@mui/icons-material/LunchDining';
 import SearchIcon from '@mui/icons-material/Search';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
@@ -173,12 +174,13 @@ const ProductList = ({ category, toggleSelection, selectedProducts }) => {
           </Typography>
         </Box>
       ) : (
-        <Grid container spacing={2}>
+        <Grid container mb={2} spacing={2}>
           {filteredProducts.map((product) => (
-            <Grid item xs={12} sm={6} md={4} key={product.id}>
+            <Grid  display="flex" justifyContent="center" alignItems="center"  size={{ xs: 12, sm: 6, md:4 }} key={product.id}>
               <Card 
                 elevation={isProductSelected(product.id) ? 3 : 1}
-                sx={{ 
+                sx={{
+
                   height: '100%',
                   border: isProductSelected(product.id) ? '2px solid #3f51b5' : 'none',
                   position: 'relative'
@@ -201,9 +203,9 @@ const ProductList = ({ category, toggleSelection, selectedProducts }) => {
                     </IconButton>
                   </Box>
                   
-                  <Box sx={{ mt: 1, display: 'flex', alignItems: 'center' }}>
+                  <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <Chip 
-                      icon={product.tipo === 'COMIDA' ? <FastfoodIcon /> : <LocalCafeIcon />}
+                      icon={product.tipo === 'COMIDA' ? <LunchDiningIcon /> : <LocalCafeIcon />}
                       label={product.tipo}
                       color={product.tipo === 'COMIDA' ? 'primary' : 'secondary'}
                       size="small"
@@ -212,18 +214,7 @@ const ProductList = ({ category, toggleSelection, selectedProducts }) => {
                     />
                   </Box>
                   
-                  <Box sx={{ mt: 2 }}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox 
-                          checked={isProductSelected(product.id)}
-                          onChange={() => toggleSelection(product)}
-                          color="primary"
-                        />
-                      }
-                      label="Seleccionar"
-                    />
-                  </Box>
+
                 </CardContent>
               </Card>
             </Grid>

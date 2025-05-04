@@ -5,6 +5,7 @@ import {
   TableRow, Chip
 } from '@mui/material';
 import FastfoodIcon from '@mui/icons-material/Fastfood';
+import LunchDiningIcon from '@mui/icons-material/LunchDining';
 import LocalCafeIcon from '@mui/icons-material/LocalCafe';
 
 const OrderSummary = ({ order }) => {
@@ -86,13 +87,13 @@ const OrderSummary = ({ order }) => {
   
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
-        Resumen total de pedidos
+      <Typography display="flex" justifyContent="center" variant="h6" gutterBottom>
+        Resumen total del pedido
       </Typography>
       
       <Box sx={{ display: 'flex', justifyContent: 'space-around', mb: 3 }}>
         <Box sx={{ textAlign: 'center' }}>
-          <FastfoodIcon color="primary" sx={{ fontSize: 40 }} />
+          <LunchDiningIcon color="primary" sx={{ fontSize: 40 }} />
           <Typography variant="h5">{totals.COMIDA}</Typography>
           <Typography variant="body2" color="textSecondary">Comidas</Typography>
         </Box>
@@ -101,11 +102,6 @@ const OrderSummary = ({ order }) => {
           <LocalCafeIcon color="secondary" sx={{ fontSize: 40 }} />
           <Typography variant="h5">{totals.BEBIDA}</Typography>
           <Typography variant="body2" color="textSecondary">Bebidas</Typography>
-        </Box>
-        
-        <Box sx={{ textAlign: 'center' }}>
-          <Typography variant="h5">{totals.total}</Typography>
-          <Typography variant="body2" color="textSecondary">Total productos</Typography>
         </Box>
       </Box>
       
@@ -118,7 +114,6 @@ const OrderSummary = ({ order }) => {
               <TableCell><strong>Tipo</strong></TableCell>
               <TableCell><strong>Producto</strong></TableCell>
               <TableCell align="center"><strong>Cantidad</strong></TableCell>
-              <TableCell><strong>Pedido por</strong></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
