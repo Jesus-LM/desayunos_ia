@@ -1,29 +1,72 @@
 // src/components/Products/CategorySelector.jsx
 import React from 'react';
+import {
+  Box,
+  ToggleButtonGroup,
+  ToggleButton,
+  Typography,
+  useMediaQuery,
+  useTheme
+} from '@mui/material';
+import FastfoodIcon from '@mui/icons-material/Fastfood';
+import LocalBarIcon from '@mui/icons-material/LocalBar';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 
-const CategorySelector = ({ activeCategory, onCategoryChange }) => {
-  const categories = [
-    { id: 'COMIDA', label: 'Comida' },
-    { id: 'BEBIDA', label: 'Bebida' },
-    { id: 'FAVORITOS', label: 'Favoritos' }
-  ];
+const CategorySelector = ({ selectedCategory, onCategoryChange, hasFavorites }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const handleCategoryChange = (event, newCategory) => {
+    if (newCategory !== null) {
+      onCategoryChange(newCategory);
+    }
+  };
 
   return (
-    <div className="flex border-b mb-6">
-      {categories.map((category) => (
-        <button
-          key={category.id}
-          className={`py-2 px-4 ${
-            activeCategory === category.id
-              ? 'border-b-2 border-blue-500 text-blue-500'
-              : 'text-gray-500'
-          }`}
-          onClick={() => onCategoryChange(category.id)}
-        >
-          {category.label}
-        </button>
-      ))}
-    </div>
+    <Box>
+      <Typography variant="subtitle1" gutterBottom>
+        Selecciona una categoría
+      </Typography>
+      <ToggleButtonGroup
+        value={selectedCategory}
+        exclusive
+        onChange={handleCategoryChange}
+        aria-label="categoría de productos"
+        sx={{ 
+          display: 'flex', 
+          flexWrap: 'wrap',
+          '& .MuiToggleButtonGroup-grouped': {
+            border: 1,
+            borderColor: 'divider',
+            m: 0.5,
+            flex: isMobile ? '1 0 30%' : 'none'
+          }
+        }}
+      >
+        <ToggleButton value="COMIDA" aria-label="comida">
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <FastfoodIcon color={selectedCategory === 'COMIDA' ? 'success' : 'action'} />
+            <Typography variant="body2" sx={{ mt: 0.5 }}>Comida</Typography>
+          </Box>
+        </ToggleButton>
+        
+        <ToggleButton value="BEBIDA" aria-label="bebida">
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <LocalBarIcon color={selectedCategory === 'BEBIDA' ? 'primary' : 'action'} />
+            <Typography variant="body2" sx={{ mt: 0.5 }}>Bebida</Typography>
+          </Box>
+        </ToggleButton>
+        
+        {hasFavorites && (
+          <ToggleButton value="FAVORITOS" aria-label="favoritos">
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <FavoriteIcon color={selectedCategory === 'FAVORITOS' ? 'error' : 'action'} />
+              <Typography variant="body2" sx={{ mt: 0.5 }}>Favoritos</Typography>
+            </Box>
+          </ToggleButton>
+        )}
+      </ToggleButtonGroup>
+    </Box>
   );
 };
 

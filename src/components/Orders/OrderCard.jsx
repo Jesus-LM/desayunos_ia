@@ -1,49 +1,98 @@
 // src/components/Orders/OrderCard.jsx
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { 
+  Card, 
+  CardContent, 
+  CardActions, 
+  Typography, 
+  Button, 
+  Box, 
+  Chip,
+  Avatar,
+  AvatarGroup
+} from '@mui/material';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import GroupIcon from '@mui/icons-material/Group';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
-const OrderCard = ({ order }) => {
-  // Formatear la fecha de creación
-  const formatDate = (timestamp) => {
-    const date = timestamp.toDate();
-    return date.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-  };
+const OrderCard = ({ order, onJoin }) => {
+  // Extraer información del pedido
+  const { name, createdAt, participants = [] } = order;
+  
+  // Formatear la fecha
+  const formattedDate = createdAt ? 
+    format(createdAt.toDate(), "d 'de' MMMM, HH:mm", { locale: es }) : 
+    'Fecha desconocida';
+  
+  // Obtener los nombres de participantes
+  const participantNames = participants.map(p => p.userName || p.userEmail || 'Anónimo');
 
   return (
-    <Link 
-      to={`/pedido/${order.id}`}
-      className="block bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+    <Card 
+      sx={{ 
+        height: '100%', 
+        display: 'flex', 
+        flexDirection: 'column',
+        transition: 'transform 0.3s, box-shadow 0.3s',
+        '&:hover': {
+          transform: 'translateY(-4px)',
+          boxShadow: 4
+        }
+      }}
+      elevation={2}
     >
-      <div className="p-5">
-        <h3 className="text-xl font-bold text-gray-800 mb-2">{order.id}</h3>
-        <p className="text-sm text-gray-500 mb-4">
-          Creado el {formatDate(order.fechaCreacion)}
-        </p>
+      <CardContent sx={{ flexGrow: 1 }}>
+        <Typography variant="h5" component="h2" gutterBottom noWrap>
+          {name}
+        </Typography>
         
-        <div className="border-t pt-4">
-          <p className="text-sm font-medium text-gray-700 mb-2">Participantes:</p>
+        <Box display="flex" alignItems="center" mb={2}>
+          <AccessTimeIcon fontSize="small" color="action" sx={{ mr: 1 }} />
+          <Typography variant="body2" color="text.secondary">
+            {formattedDate}
+          </Typography>
+        </Box>
+
+        <Box mb={1}>
+          <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+            <GroupIcon fontSize="small" sx={{ mr: 1 }} />
+            {participantNames.length ? `${participantNames.length} participantes` : 'Sin participantes'}
+          </Typography>
           
-          {order.usuarios && order.usuarios.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {order.usuarios.map((usuario, index) => (
-                <span 
-                  key={usuario.id + index}
-                  className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
-                >
-                  {usuario.nombre}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-gray-500">Aún no hay participantes</p>
+          {participants.length > 0 && (
+            <Box mt={1}>
+              <AvatarGroup max={4} sx={{ justifyContent: 'flex-start' }}>
+                {participants.map((participant, index) => (
+                  <Avatar 
+                    key={`${participant.userId}-${index}`} 
+                    alt={participant.userName || participant.userEmail}
+                    src={participant.userPhotoURL}
+                    sx={{ width: 24, height: 24 }}
+                  >
+                    {(participant.userName || participant.userEmail || '?').charAt(0).toUpperCase()}
+                  </Avatar>
+                ))}
+              </AvatarGroup>
+            </Box>
           )}
-        </div>
-      </div>
-    </Link>
+        </Box>
+      </CardContent>
+      
+      <CardActions sx={{ justifyContent: 'flex-end', p: 1.5 }}>
+        <Button 
+          variant="contained" 
+          size="small" 
+          onClick={onJoin}
+          sx={{ 
+            borderRadius: '20px',
+            textTransform: 'none'
+          }}
+        >
+          Unirse al pedido
+        </Button>
+      </CardActions>
+    </Card>
   );
 };
 

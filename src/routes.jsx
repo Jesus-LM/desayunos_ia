@@ -1,39 +1,23 @@
-// src/routes.jsx
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './hooks/useAuth';
+import MainLayout from './components/Layout/MainLayout';
 import Login from './components/Auth/Login';
 import OrderList from './components/Orders/OrderList';
 import CreateOrder from './components/Orders/CreateOrder';
 import OrderDetail from './components/Orders/OrderDetail';
-import MainLayout from './components/Layout/MainLayout';
 import Loading from './components/Layout/Loading';
+import { useAuth } from './hooks/useAuth';
 
-// Componente para proteger rutas que requieren autenticación
-const PrivateRoute = ({ children }) => {
-  const { currentUser, userData } = useAuth();
+// Componente de protección de rutas
+const ProtectedRoute = ({ children }) => {
+  const { currentUser, loading } = useAuth();
   
-  if (!currentUser) {
-    return <Navigate to="/login" />;
-  }
-  
-  if (!userData) {
+  if (loading) {
     return <Loading />;
   }
   
-  return (
-    <MainLayout>
-      {children}
-    </MainLayout>
-  );
-};
-
-// Componente para dirigir usuarios autenticados al inicio
-const PublicRoute = ({ children }) => {
-  const { currentUser } = useAuth();
-  
-  if (currentUser) {
-    return <Navigate to="/" />;
+  if (!currentUser) {
+    return <Navigate to="/login" replace />;
   }
   
   return children;
@@ -42,32 +26,22 @@ const PublicRoute = ({ children }) => {
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/login" element={
-        <PublicRoute>
-          <Login />
-        </PublicRoute>
-      } />
+      <Route path="/login" element={<Login />} />
       
       <Route path="/" element={
-        <PrivateRoute>
-          <OrderList />
-        </PrivateRoute>
-      } />
+        <ProtectedRoute>
+          <MainLayout />
+        </ProtectedRoute>
+      }>
+        {/* Rutas anidadas dentro del layout principal */}
+        <Route index element={<Navigate to="/orders" replace />} />
+        <Route path="orders" element={<OrderList />} />
+        <Route path="orders/create" element={<CreateOrder />} />
+        <Route path="orders/:orderId" element={<OrderDetail />} />
+      </Route>
       
-      <Route path="/crear-pedido" element={
-        <PrivateRoute>
-          <CreateOrder />
-        </PrivateRoute>
-      } />
-      
-      <Route path="/pedido/:orderId" element={
-        <PrivateRoute>
-          <OrderDetail />
-        </PrivateRoute>
-      } />
-      
-      {/* Ruta para cualquier otra dirección no definida */}
-      <Route path="*" element={<Navigate to="/" />} />
+      {/* Ruta por defecto - redirige a la lista de pedidos */}
+      <Route path="*" element={<Navigate to="/orders" replace />} />
     </Routes>
   );
 };

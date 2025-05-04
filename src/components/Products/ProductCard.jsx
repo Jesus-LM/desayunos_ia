@@ -1,45 +1,113 @@
 // src/components/Products/ProductCard.jsx
 import React from 'react';
+import {
+  Card,
+  CardContent,
+  CardActions,
+  Typography,
+  IconButton,
+  Box,
+  Chip
+} from '@mui/material';
+import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+import RemoveShoppingCartIcon from '@mui/icons-material/RemoveShoppingCart';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import FastfoodIcon from '@mui/icons-material/Fastfood';
+import LocalBarIcon from '@mui/icons-material/LocalBar';
+import { useFavorites } from '../../hooks/useFavorites';
 
-const ProductCard = ({ product, isSelected, isFavorite, onToggleSelect, onToggleFavorite }) => {
+const ProductCard = ({ product, isSelected, onToggleSelect }) => {
+  const { toggleFavorite, favorites } = useFavorites();
+  const isFavorite = favorites?.includes(product.id);
+
+  const handleToggleFavorite = (e) => {
+    e.stopPropagation();
+    toggleFavorite(product.id);
+  };
+
+  // Determinar icono según el tipo
+  const getTypeIcon = () => {
+    switch (product.type) {
+      case 'COMIDA':
+        return <FastfoodIcon fontSize="small" />;
+      case 'BEBIDA':
+        return <LocalBarIcon fontSize="small" />;
+      default:
+        return <FastfoodIcon fontSize="small" />;
+    }
+  };
+
   return (
-    <div 
-      className={`border rounded-lg p-4 cursor-pointer transition-all ${
-        isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
-      }`}
+    <Card 
       onClick={onToggleSelect}
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        cursor: 'pointer',
+        position: 'relative',
+        transition: 'transform 0.2s, box-shadow 0.2s',
+        border: isSelected ? '2px solid #1976d2' : '2px solid transparent',
+        '&:hover': {
+          transform: 'translateY(-4px)',
+          boxShadow: 3
+        }
+      }}
+      elevation={isSelected ? 4 : 1}
     >
-      <div className="flex justify-between items-start">
-        <div>
-          <h3 className="font-medium text-lg">{product.nombre}</h3>
-          <p className="text-sm text-gray-500 capitalize">{product.tipo}</p>
-        </div>
-        
-        {/* Botón de favorito */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation(); // Evitar que se active el toggle de selección
-            onToggleFavorite();
+      <CardContent sx={{ flexGrow: 1, pb: 1 }}>
+        <Typography 
+          variant="h6" 
+          component="h3" 
+          gutterBottom
+          sx={{ 
+            fontSize: '1rem',
+            fontWeight: 500,
+            lineHeight: 1.2,
+            height: '2.4em',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical'
           }}
-          className="text-2xl focus:outline-none"
+        >
+          {product.name}
+        </Typography>
+        
+        <Box display="flex" alignItems="center" mt={1}>
+          <Chip 
+            icon={getTypeIcon()} 
+            label={product.type}
+            size="small"
+            color={product.type === 'COMIDA' ? 'success' : 'primary'}
+            variant="outlined"
+          />
+        </Box>
+      </CardContent>
+      
+      <CardActions sx={{ justifyContent: 'space-between', pt: 0 }}>
+        <IconButton 
+          size="small" 
+          color={isFavorite ? 'error' : 'default'}
+          onClick={handleToggleFavorite}
           aria-label={isFavorite ? "Quitar de favoritos" : "Añadir a favoritos"}
         >
-          {isFavorite ? '★' : '☆'}
-        </button>
-      </div>
-      
-      {/* Indicador de selección */}
-      {isSelected && (
-        <div className="mt-2 flex items-center text-blue-600">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-          </svg>
-          <span className="text-sm">Seleccionado</span>
-        </div>
-      )}
-    </div>
+          {isFavorite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+        </IconButton>
+        
+        <IconButton 
+          size="small" 
+          color={isSelected ? 'primary' : 'default'}
+          onClick={onToggleSelect}
+          aria-label={isSelected ? "Quitar del pedido" : "Añadir al pedido"}
+        >
+          {isSelected ? <RemoveShoppingCartIcon /> : <AddShoppingCartIcon />}
+        </IconButton>
+      </CardActions>
+    </Card>
   );
 };
 
 export default ProductCard;
-  

@@ -1,74 +1,48 @@
-// src/hooks/useOrders.js
-import { useState, useEffect } from 'react';
-import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase/config';
+import { useState, useEffect } from "react";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { db } from "../firebase/config";
+import { useAuth } from "./useAuth";
 
 export const useOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     const fetchOrders = async () => {
+      if (!currentUser) {
+        setLoading(false);
+        return;
+      }
+      
       try {
-        const ordersCollection = collection(db, 'PEDIDOS');
-        const ordersSnapshot = await getDocs(ordersCollection);
+        setLoading(true);
+        const q = query(collection(db, "PEDIDOS"), orderBy("createdAt", "desc"));
+        const querySnapshot = await getDocs(q);
+        const ordersData = [];
         
-        const ordersData = ordersSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        
-        // Ordenar por fecha de creación (más reciente primero)
-        ordersData.sort((a, b) => b.fechaCreacion.toDate() - a.fechaCreacion.toDate());
+        querySnapshot.forEach((doc) => {
+          const orderData = { id: doc.id, ...doc.data() };
+          // Convertir timestamp a Date para mostrar fecha correctamente
+          if (orderData.createdAt) {
+            orderData.createdAt = orderData.createdAt.toDate();
+          }
+          ordersData.push(orderData);
+        });
         
         setOrders(ordersData);
+        setError(null);
       } catch (err) {
-        console.error('Error al obtener pedidos:', err);
-        setError('No se pudieron cargar los pedidos');
+        console.error("Error al cargar pedidos:", err);
+        setError("Error al cargar pedidos. Por favor, inténtalo de nuevo.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchOrders();
-  }, []);
+  }, [currentUser]);
 
   return { orders, loading, error };
-};
-
-export const useOrder = (orderId) => {
-  const [order, setOrder] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchOrder = async () => {
-      if (!orderId) return;
-      
-      try {
-        const orderRef = doc(db, 'PEDIDOS', orderId);
-        const orderDoc = await getDoc(orderRef);
-        
-        if (!orderDoc.exists()) {
-          setError('El pedido no existe');
-          return;
-        }
-        
-        setOrder({
-          id: orderDoc.id,
-          ...orderDoc.data()
-        });
-      } catch (err) {
-        console.error('Error al obtener pedido:', err);
-        setError('No se pudo cargar el pedido');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrder();
-  }, [orderId]);
-
-  return { order, loading, error };
 };

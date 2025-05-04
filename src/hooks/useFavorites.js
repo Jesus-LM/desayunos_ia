@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
-import { useAuth } from '../components/Auth/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 
 export const useFavorites = () => {
   const { currentUser, userData } = useAuth();
