@@ -4,7 +4,6 @@ import {
   doc, 
   getDoc, 
   getDocs, 
-  setDoc, 
   updateDoc, 
   arrayUnion, 
   arrayRemove, 
@@ -146,29 +145,17 @@ export const crearPedido = async (nombrePedido, usuarioEmail, productos = []) =>
         nombreUsuario = usuario.nombre;
       }
     } catch (e) {
-      console.log("No se pudo obtener el usuario, usando email como nombre");
+      console.log(e, "No se pudo obtener el usuario, usando email como nombre");
     }
     
     // Crear el pedido usando addDoc para generar un ID aleatorio
     const pedidoRef = collection(db, 'PEDIDOS');
-    
-    // Esta estructura combina ambos formatos para compatibilidad
+
     const nuevoPedido = {
-      // Campos antiguos (usados en el componente)
-      name: nombrePedido,
-      createdAt: serverTimestamp(),
-      createdBy: usuarioEmail,
-      participants: [{
-        userId: usuarioEmail,
-        userName: nombreUsuario,
-        products: productos
-      }],
-      
-      // Campos nuevos (usados en las funciones existentes)
       nombre: nombrePedido,
       fechaCreacion: serverTimestamp(),
       usuarios: [{
-        email: usuarioEmail,
+        id: usuarioEmail,
         nombre: nombreUsuario,
         productos: productos
       }]
@@ -187,20 +174,20 @@ export const crearPedido = async (nombrePedido, usuarioEmail, productos = []) =>
 // Obtener todos los pedidos
 export const getPedidos = async () => {
   try {
-    // Consulta que funciona con ambos formatos (name o nombre)
-    const q = query(collection(db, 'PEDIDOS'), orderBy('createdAt', 'desc'));
+
+    const q = query(collection(db, 'PEDIDOS'), orderBy('fechaCreacion', 'desc'));
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => {
       const data = doc.data();
       // Asegurarnos que tenemos una estructura consistente
       return {
         id: doc.id,
-        name: data.name || data.nombre,
-        createdAt: data.createdAt || data.fechaCreacion,
-        participants: data.participants || data.usuarios?.map(u => ({
-          userId: u.email,
-          userName: u.nombre,
-          products: u.productos
+        nombre: data.nombre,
+        fechaCreacion: data.fechaCreacion,
+        usuarios: data.usuarios?.map(u => ({
+          id: u.email,
+          nombre: u.nombre,
+          productos: u.productos
         })) || [],
         ...data
       };
@@ -222,12 +209,12 @@ export const getPedido = async (pedidoId) => {
       // Asegurarnos que tenemos una estructura consistente
       return {
         id: docSnap.id,
-        name: data.name || data.nombre,
-        createdAt: data.createdAt || data.fechaCreacion,
-        participants: data.participants || data.usuarios?.map(u => ({
-          userId: u.email,
-          userName: u.nombre,
-          products: u.productos
+        nombre: data.nombre,
+        fechaCreacion: data.fechaCreacion,
+        usuarios:  data.usuarios?.map(u => ({
+          id: u.email,
+          nombre: u.nombre,
+          productos: u.productos
         })) || [],
         ...data
       };
@@ -251,7 +238,7 @@ export const unirseAPedido = async (pedidoId, usuarioEmail, productos) => {
         nombreUsuario = usuario.nombre;
       }
     } catch (e) {
-      console.log("No se pudo obtener el usuario, usando email como nombre");
+      console.log(e,"No se pudo obtener el usuario, usando email como nombre");
     }
     
     const pedidoRef = doc(db, 'PEDIDOS', pedidoId);
@@ -263,36 +250,8 @@ export const unirseAPedido = async (pedidoId, usuarioEmail, productos) => {
     
     const pedidoData = pedidoSnap.data();
     
-    // Manejar estructura antigua (participants)
-    if (pedidoData.participants) {
-      const participantIndex = pedidoData.participants.findIndex(p => p.userId === usuarioEmail);
-      
-      if (participantIndex !== -1) {
-        // Si el usuario ya está en el pedido, actualizar sus productos
-        const updatedParticipants = [...pedidoData.participants];
-        updatedParticipants[participantIndex] = {
-          ...updatedParticipants[participantIndex],
-          products: productos || []
-        };
-        
-        await updateDoc(pedidoRef, {
-          participants: updatedParticipants
-        });
-      } else {
-        // Añadir el usuario al pedido
-        await updateDoc(pedidoRef, {
-          participants: arrayUnion({
-            userId: usuarioEmail,
-            userName: nombreUsuario,
-            products: productos || []
-          })
-        });
-      }
-    }
-    
-    // Manejar estructura nueva (usuarios)
     if (pedidoData.usuarios) {
-      const usuarioIndex = pedidoData.usuarios.findIndex(u => u.email === usuarioEmail);
+      const usuarioIndex = pedidoData.usuarios.findIndex(u => u.id === usuarioEmail);
       
       if (usuarioIndex !== -1) {
         // Si el usuario ya está en el pedido, actualizar sus productos
@@ -309,7 +268,7 @@ export const unirseAPedido = async (pedidoId, usuarioEmail, productos) => {
         // Añadir el usuario al pedido
         await updateDoc(pedidoRef, {
           usuarios: arrayUnion({
-            email: usuarioEmail,
+            id: usuarioEmail,
             nombre: nombreUsuario,
             productos: productos || []
           })
@@ -335,27 +294,8 @@ export const actualizarProductosEnPedido = async (pedidoId, usuarioEmail, produc
     }
     
     const pedidoData = pedidoSnap.data();
-    
-    // Manejar estructura antigua (participants)
-    if (pedidoData.participants) {
-      const participantIndex = pedidoData.participants.findIndex(p => p.userId === usuarioEmail);
-      
-      if (participantIndex !== -1) {
-        const updatedParticipants = [...pedidoData.participants];
-        updatedParticipants[participantIndex] = {
-          ...updatedParticipants[participantIndex],
-          products: productos
-        };
-        
-        await updateDoc(pedidoRef, {
-          participants: updatedParticipants
-        });
-      }
-    }
-    
-    // Manejar estructura nueva (usuarios)
     if (pedidoData.usuarios) {
-      const usuarioIndex = pedidoData.usuarios.findIndex(u => u.email === usuarioEmail);
+      const usuarioIndex = pedidoData.usuarios.findIndex(u => u.id === usuarioEmail);
       
       if (usuarioIndex !== -1) {
         const usuariosActualizados = [...pedidoData.usuarios];
@@ -389,11 +329,11 @@ export const getResumenPedido = async (pedidoId) => {
     };
     
     // Para cada usuario/participante en el pedido
-    const participantes = pedido.participants || pedido.usuarios || [];
+    const participantes =  pedido.usuarios || [];
     
     for (const participante of participantes) {
       // Obtener los productos (pueden estar en diferentes ubicaciones según la estructura)
-      const productos = participante.products || participante.productos || [];
+      const productos =  participante.productos || [];
       
       // Para cada producto en el pedido del usuario
       for (const productoId of productos) {
@@ -402,7 +342,7 @@ export const getResumenPedido = async (pedidoId) => {
         
         if (productoSnap.exists()) {
           const producto = productoSnap.data();
-          const categoria = (producto.tipo || producto.type || 'otro').toLowerCase();
+          const categoria = (producto.tipo || 'otro').toLowerCase();
           
           if (!resumen[categoria]) {
             resumen[categoria] = {};
@@ -410,7 +350,7 @@ export const getResumenPedido = async (pedidoId) => {
           
           if (!resumen[categoria][productoId]) {
             resumen[categoria][productoId] = {
-              nombre: producto.nombre || producto.name,
+              nombre: producto.nombre,
               cantidad: 1
             };
           } else {

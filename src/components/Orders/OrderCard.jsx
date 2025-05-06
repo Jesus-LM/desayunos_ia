@@ -18,15 +18,15 @@ import { es } from 'date-fns/locale';
 
 const OrderCard = ({ order, onJoin }) => {
   // Extraer información del pedido
-  const { name, createdAt, participants = [] } = order;
+  const { nombre, fechaCreacion, usuarios = [] } = order;
   
   // Formatear la fecha
-  const formattedDate = createdAt ? 
-    format(createdAt.toDate(), "d 'de' MMMM, HH:mm", { locale: es }) : 
+  const formattedDate = fechaCreacion ? 
+    format(fechaCreacion.toDate(), "d 'de' MMMM, HH:mm", { locale: es }) : 
     'Fecha desconocida';
   
   // Obtener los nombres de participantes
-  const participantNames = participants.map(p => p.userName || p.userEmail || 'Anónimo');
+  const participantNames = usuarios.map(p => p.nombre);
 
   return (
     <Card 
@@ -44,7 +44,7 @@ const OrderCard = ({ order, onJoin }) => {
     >
       <CardContent sx={{ flexGrow: 1 }}>
         <Typography variant="h5" component="h2" gutterBottom noWrap>
-          {name}
+          {nombre}
         </Typography>
         
         <Box display="flex" alignItems="center" mb={2}>
@@ -60,17 +60,17 @@ const OrderCard = ({ order, onJoin }) => {
             {participantNames.length ? `${participantNames.length} participantes` : 'Sin participantes'}
           </Typography>
           
-          {participants.length > 0 && (
+          {usuarios.length > 0 && (
             <Box mt={1}>
               <AvatarGroup max={4} sx={{ justifyContent: 'flex-start' }}>
-                {participants.map((participant, index) => (
+                {usuarios.map((usuario, index) => (
                   <Avatar 
-                    key={`${participant.userId}-${index}`} 
-                    alt={participant.userName || participant.userEmail}
-                    src={participant.userPhotoURL}
+                    key={`${usuario.email}-${index}`} 
+                    alt={usuario.nombre}
+                    src={usuario.PhotoURL}
                     sx={{ width: 24, height: 24 }}
                   >
-                    {(participant.userName || participant.userEmail || '?').charAt(0).toUpperCase()}
+                    {(usuario.nombre).charAt(0).toUpperCase()}
                   </Avatar>
                 ))}
               </AvatarGroup>

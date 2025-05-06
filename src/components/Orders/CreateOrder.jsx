@@ -4,7 +4,6 @@ import {
   Button, TextField, Typography, Container, Box, 
   CircularProgress, Paper, Snackbar, Alert 
 } from '@mui/material';
-import { serverTimestamp } from 'firebase/firestore';
 import { crearPedido } from '../../firebase/firestore';
 import { useAuth } from '../../hooks/useAuth';
 

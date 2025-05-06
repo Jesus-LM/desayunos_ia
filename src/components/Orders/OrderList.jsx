@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { 
   Typography, Container, Box, Grid, Card, CardContent, 
-  CardActionArea, CircularProgress, Button, Chip, Divider 
+  CardActionArea, CircularProgress, IconButton,DialogTitle,
+  DialogActions,DialogContent,DialogContentText,Dialog,
+  Button, Chip, Divider 
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import { collection, getDocs, onSnapshot, query, orderBy } from 'firebase/firestore';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { collection, onSnapshot, query, orderBy,deleteDoc,doc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -13,12 +16,14 @@ const OrderList = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const { currentUser } = useAuth();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [orderToDelete, setOrderToDelete] = useState(null);
 
   useEffect(() => {
     if (!currentUser) return;
 
     const ordersRef = collection(db, 'PEDIDOS');
-    const q = query(ordersRef, orderBy('createdAt', 'desc'));
+    const q = query(ordersRef, orderBy('fechaCreacion', 'desc'));
 
     // Usar onSnapshot para actualización en tiempo real
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -28,7 +33,7 @@ const OrderList = () => {
           id: doc.id,
           ...doc.data(),
           // Convertir timestamp a Date para mostrar fecha correctamente
-          createdAt: doc.data().createdAt ? doc.data().createdAt.toDate() : new Date()
+          fechaCreacion: doc.data().fechaCreacion ? doc.data().fechaCreacion.toDate() : new Date()
         });
       });
       setOrders(ordersData);
@@ -41,12 +46,6 @@ const OrderList = () => {
     return () => unsubscribe();
   }, [currentUser]);
 
-  // Función para mostrar participantes de forma legible
-  const renderParticipants = (participants) => {
-    if (!participants || participants.length === 0) return "Sin participantes";
-    
-    return participants.map(p => p.userName || p.userId).join(', ');
-  };
 
   // Formatear fecha para mostrar
   const formatDate = (date) => {
@@ -59,6 +58,36 @@ const OrderList = () => {
       minute: '2-digit'
     });
   };
+
+  // Manejadores para el diálogo de confirmación de borrado
+  const handleDeleteClick = (event, order) => {
+    event.stopPropagation();
+    event.preventDefault();
+    setOrderToDelete(order);
+    setDeleteDialogOpen(true);
+  };
+  
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setOrderToDelete(null);
+  };
+  
+  const handleConfirmDelete = async () => {
+    if (!orderToDelete) return;
+    
+    try {
+      setLoading(true);
+      await deleteDoc(doc(db, 'PEDIDOS', orderToDelete.id));
+      setDeleteDialogOpen(false);
+      setOrderToDelete(null);
+      // No necesitamos actualizar orders manualmente, ya que onSnapshot lo hará automáticamente
+    } catch (error) {
+      console.error("Error al eliminar el pedido:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   if (loading) {
     return (
@@ -95,19 +124,35 @@ const OrderList = () => {
         <Grid container spacing={3}>
           {orders.map((order) => (
             <Grid size={{xs:12, sm:6, md:4}} key={order.id}>
-              <Card elevation={3} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <Card elevation={3} sx={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                <IconButton 
+                  aria-label="eliminar pedido" 
+                  sx={{ 
+                    position: 'absolute', 
+                    top: 8, 
+                    right: 8, 
+                    fontWeight: 'bold',
+                    color: 'error.main',
+                    zIndex: 1,
+                    bgcolor: 'background.paper',
+                    '&:hover': { bgcolor: 'error.lighter' }
+                  }}
+                  onClick={(e) => handleDeleteClick(e, order)}
+                >
+                  <DeleteIcon/>
+                </IconButton>
                 <CardActionArea 
                   component={RouterLink} 
                   to={`/orders/${order.id}`}
                   sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
                 >
                   <CardContent sx={{ flexGrow: 1 }}>
-                    <Typography variant="h5" component="h2" gutterBottom noWrap>
-                      {order.name}
+                    <Typography fontWeight="500" color="primary" display="flex" justifyContent="center" variant="h5" component="h2" gutterBottom noWrap>
+                      {order.nombre}
                     </Typography>
                     
-                    <Typography variant="caption" color="textSecondary" sx={{ mb: 1, display: 'block' }}>
-                      Creado: {formatDate(order.createdAt)}
+                    <Typography display="flex" justifyContent="center" variant="caption" color="textSecondary" sx={{ mb: 1 }}>
+                      Creado: {formatDate(order.fechaCreacion)}
                     </Typography>
                     
                     <Divider sx={{ my: 1 }} />
@@ -117,11 +162,11 @@ const OrderList = () => {
                     </Typography>
                     
                     <Box sx={{ mt: 1 }}>
-                      {order.participants && order.participants.length > 0 ? (
-                        order.participants.map((participant, index) => (
+                      {order.usuarios && order.usuarios.length > 0 ? (
+                        order.usuarios.map((usuario, index) => (
                           <Chip 
                             key={index}
-                            label={participant.userName || participant.userId}
+                            label={usuario.nombre}
                             size="small"
                             sx={{ m: 0.5 }}
                           />
@@ -137,6 +182,39 @@ const OrderList = () => {
           ))}
         </Grid>
       )}
+
+      {/* Diálogo de confirmación para eliminar pedido */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        sx={{
+          '& .MuiPaper-root': {
+            borderRadius: 5,}
+        }}
+      >
+        <DialogTitle textAlign='center' fontWeight='bold' id="alert-dialog-title">
+          Eliminar pedido
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText textAlign='center' id="alert-dialog-description">
+            ¿Estás seguro de que deseas eliminar el pedido "{orderToDelete?.nombre}"? 
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{
+          display:"flex",
+          justifyContent:"space-between",
+
+        }}>
+          <Button  onClick={handleCloseDeleteDialog} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error" autoFocus>
+            Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

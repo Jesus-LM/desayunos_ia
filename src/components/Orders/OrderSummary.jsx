@@ -11,16 +11,16 @@ import LocalCafeIcon from '@mui/icons-material/LocalCafe';
 const OrderSummary = ({ order }) => {
   // Calcular el resumen de productos agrupados por tipo y ordenados
   const productSummary = useMemo(() => {
-    if (!order || !order.participants) return [];
+    if (!order || !order.usuarios) return [];
     
     // Primero vamos a extraer todos los productos de todos los participantes
     const allProducts = [];
-    order.participants.forEach(participant => {
-      if (participant.products && participant.products.length > 0) {
-        participant.products.forEach(product => {
+    order.usuarios.forEach(usuario => {
+      if (usuario.productos && usuario.productos.length > 0) {
+        usuario.productos.forEach(producto => {
           allProducts.push({
-            ...product,
-            orderedBy: participant.userName || participant.userId
+            ...producto,
+            orderedBy: usuario.nombre
           });
         });
       }
@@ -29,21 +29,21 @@ const OrderSummary = ({ order }) => {
     // Agrupamos los productos por tipo y nombre
     const groupedProducts = {};
     
-    allProducts.forEach(product => {
-      const key = `${product.type}-${product.name}`;
+    allProducts.forEach(producto => {
+      const key = `${producto.tipo}-${producto.nombre}`;
       
       if (!groupedProducts[key]) {
         groupedProducts[key] = {
-          id: product.id,
-          name: product.name,
-          type: product.type,
-          count: 1,
-          orderedBy: [product.orderedBy]
+          id: producto.id,
+          nombre: producto.nombre,
+          tipo: producto.tipo,
+          cantidad: 1,
+          orderedBy: [producto.orderedBy]
         };
       } else {
-        groupedProducts[key].count += 1;
-        if (!groupedProducts[key].orderedBy.includes(product.orderedBy)) {
-          groupedProducts[key].orderedBy.push(product.orderedBy);
+        groupedProducts[key].cantidad += 1;
+        if (!groupedProducts[key].orderedBy.includes(producto.orderedBy)) {
+          groupedProducts[key].orderedBy.push(producto.orderedBy);
         }
       }
     });
@@ -53,9 +53,9 @@ const OrderSummary = ({ order }) => {
     
     // Ordenamos primero por tipo (COMIDA antes que BEBIDA) y luego alfabéticamente por nombre
     result.sort((a, b) => {
-      if (a.type === 'COMIDA' && b.type !== 'COMIDA') return -1;
-      if (a.type !== 'COMIDA' && b.type === 'COMIDA') return 1;
-      return a.name.localeCompare(b.name);
+      if (a.tipo === 'COMIDA' && b.tipo !== 'COMIDA') return -1;
+      if (a.tipo !== 'COMIDA' && b.tipo === 'COMIDA') return 1;
+      return a.nombre.localeCompare(b.nombre);
     });
     
     return result;
@@ -66,16 +66,14 @@ const OrderSummary = ({ order }) => {
     const result = {
       COMIDA: 0,
       BEBIDA: 0,
-      total: 0
     };
     
-    productSummary.forEach(product => {
-      if (product.type === 'COMIDA') {
-        result.COMIDA += product.count;
-      } else if (product.type === 'BEBIDA') {
-        result.BEBIDA += product.count;
+    productSummary.forEach(producto => {
+      if (producto.tipo === 'COMIDA') {
+        result.COMIDA += producto.cantidad;
+      } else if (producto.tipo === 'BEBIDA') {
+        result.BEBIDA += producto.cantidad;
       }
-      result.total += product.count;
     });
     
     return result;
@@ -122,17 +120,17 @@ const OrderSummary = ({ order }) => {
                 <TableRow key={index}>
                   <TableCell>
                     <Chip 
-                      icon={product.type === 'COMIDA' ? <FastfoodIcon /> : <LocalCafeIcon />}
-                      label={product.type}
-                      color={product.type === 'COMIDA' ? 'primary' : 'secondary'}
+                      icon={product.tipo === 'COMIDA' ? <FastfoodIcon /> : <LocalCafeIcon />}
+                      label={product.tipo}
+                      color={product.tipo === 'COMIDA' ? 'primary' : 'secondary'}
                       size="small"
                       variant="outlined"
                     />
                   </TableCell>
-                  <TableCell>{product.name}</TableCell>
+                  <TableCell>{product.nombre}</TableCell>
                   <TableCell align="center">
                     <Chip 
-                      label={product.count}
+                      label={product.cantidad}
                       color="default"
                       size="small"
                     />

@@ -14,6 +14,7 @@ import RemoveShoppingCartIcon from '@mui/icons-material/RemoveShoppingCart';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FastfoodIcon from '@mui/icons-material/Fastfood';
+import LunchDiningIcon from '@mui/icons-material/LunchDining';
 import LocalBarIcon from '@mui/icons-material/LocalBar';
 import { useFavorites } from '../../hooks/useFavorites';
 
@@ -30,11 +31,11 @@ const ProductCard = ({ product, isSelected, onToggleSelect }) => {
   const getTypeIcon = () => {
     switch (product.type) {
       case 'COMIDA':
-        return <FastfoodIcon fontSize="small" />;
+        return <LunchDiningIcon fontSize="small" />;
       case 'BEBIDA':
         return <LocalBarIcon fontSize="small" />;
       default:
-        return <FastfoodIcon fontSize="small" />;
+        return <LunchDiningIcon fontSize="small" />;
     }
   };
 
@@ -73,15 +74,15 @@ const ProductCard = ({ product, isSelected, onToggleSelect }) => {
             WebkitBoxOrient: 'vertical'
           }}
         >
-          {product.name}
+          {product.nombre}
         </Typography>
         
         <Box display="flex" alignItems="center" mt={1}>
           <Chip 
             icon={getTypeIcon()} 
-            label={product.type}
+            label={product.tipo}
             size="small"
-            color={product.type === 'COMIDA' ? 'success' : 'primary'}
+            color={product.tipo === 'COMIDA' ? 'success' : 'primary'}
             variant="outlined"
           />
         </Box>

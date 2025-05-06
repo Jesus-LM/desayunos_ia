@@ -6,7 +6,10 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import LunchDiningIcon from '@mui/icons-material/LunchDining';
+import LocalCafeIcon from '@mui/icons-material/LocalCafe';
 import ReceiptLongIcon from '@mui/icons-material/Summarize';
+import GradeIcon from '@mui/icons-material/Grade';
 import { doc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { useAuth } from '../../hooks/useAuth';
@@ -47,14 +50,14 @@ const OrderDetail = () => {
           setOrder(orderData);
           
           // Verificar si el usuario ya está participando
-          const userParticipant = orderData.participants?.find(
-            p => p.userId === currentUser.email
+          const userParticipant = orderData.usuarios?.find(
+            p => p.id === currentUser.email
           );
           
           setUserParticipating(!!userParticipant);
           
           if (userParticipant) {
-            setUserProductsInOrder(userParticipant.products || []);
+            setUserProductsInOrder(userParticipant.productos || []);
           }
         } else {
           navigate('/orders');
@@ -96,25 +99,25 @@ const OrderDetail = () => {
       if (!userParticipating) {
         // Añadir usuario como nuevo participante
         await updateDoc(orderRef, {
-          participants: arrayUnion({
-            userId: currentUser.email,
-            userName: currentUser.displayName || currentUser.email,
-            products: selectedProducts
+          usuarios: arrayUnion({
+            id: currentUser.email,
+            nombre: currentUser.displayName || currentUser.email,
+            productos: selectedProducts
           })
         });
         setUserParticipating(true);
       } else {
         // Actualizar productos del usuario
         const updatedOrder = { ...order };
-        const participantIndex = updatedOrder.participants.findIndex(
-          p => p.userId === currentUser.email
+        const participantIndex = updatedOrder.usuarios.findIndex(
+          p => p.id === currentUser.email
         );
         
         if (participantIndex !== -1) {
-          updatedOrder.participants[participantIndex].products = selectedProducts;
+          updatedOrder.usuarios[participantIndex].productos = selectedProducts;
           
           await updateDoc(orderRef, {
-            participants: updatedOrder.participants
+            usuarios: updatedOrder.usuarios
           });
         }
       }
@@ -153,7 +156,7 @@ const OrderDetail = () => {
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Typography variant="h4" component="h1">
-            {order?.name}
+            {order?.nombre}
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -170,21 +173,21 @@ const OrderDetail = () => {
       <Card sx={{ mb: 4 }}>
         <CardContent>
           <Typography variant="body1" color="textSecondary">
-            <strong>Fecha:</strong> {order?.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleString() : 'Desconocido'}
+            <strong>Fecha:</strong> {order?.fechaCreacion ? new Date(order.fechaCreacion.seconds * 1000).toLocaleString() : 'Desconocido'}
           </Typography>
           
           <Divider sx={{ my: 2 }} />
           
           <Typography variant="body1" gutterBottom>
-            <strong>Participantes ({order?.participants?.length || 0}):</strong>
+            <strong>Participantes ({order?.usuarios?.length || 0}):</strong>
           </Typography>
           
           <List dense>
-            {order?.participants?.map((participant, index) => (
+            {order?.usuarios?.map((usuario, index) => (
               <ListItem key={index}>
                 <ListItemText 
-                  primary={participant.userName || participant.userId} 
-                  secondary={`${participant.products?.length || 0} productos seleccionados`} 
+                  primary={usuario.nombre || usuario.id} 
+                  secondary={`${usuario.productos?.length || 0} productos seleccionados`} 
                 />
               </ListItem>
             ))}
@@ -195,9 +198,9 @@ const OrderDetail = () => {
       <Box sx={{ width: '100%' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={activeTab} onChange={handleTabChange} centered aria-label="categorías de productos">
-            <Tab label="Comida" />
-            <Tab label="Bebida" />
-            <Tab label="Favoritos" />
+            <Tab label= "Comida" icon={<LunchDiningIcon/>} />
+            <Tab label="Bebida" icon={<LocalCafeIcon />} />
+            <Tab label="Favoritos" icon={<GradeIcon />} />
           </Tabs>
         </Box>
         
@@ -234,8 +237,8 @@ const OrderDetail = () => {
                   {userProductsInOrder.map((product, index) => (
                     <ListItem key={index}>
                       <ListItemText 
-                        primary={product.name} 
-                        secondary={product.type} 
+                        primary={product.nombre} 
+                        secondary={product.tipo} 
                       />
                     </ListItem>
                   ))}
@@ -271,7 +274,7 @@ const OrderDetail = () => {
       >
         <DialogTitle>
           <Typography fontSize="2rem" fontWeight="bold" color="primary" align="center">
-            {order?.name}
+            {order?.nombre}
            </Typography>
         </DialogTitle>
         <DialogContent dividers>

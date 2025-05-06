@@ -8,13 +8,12 @@ import LunchDiningIcon from '@mui/icons-material/LunchDining';
 import SearchIcon from '@mui/icons-material/Search';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
-import FastfoodIcon from '@mui/icons-material/Fastfood';
 import LocalCafeIcon from '@mui/icons-material/LocalCafe';
 import { collection, getDocs, query, where, doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { useAuth } from '../../hooks/useAuth';
 
-const ProductList = ({ category, toggleSelection, selectedProducts }) => {
+const ProductList = ({ category, selectedProducts }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -180,8 +179,8 @@ const ProductList = ({ category, toggleSelection, selectedProducts }) => {
               <Card 
                 elevation={isProductSelected(product.id) ? 3 : 1}
                 sx={{
-
                   height: '100%',
+                  width: '100%',
                   border: isProductSelected(product.id) ? '2px solid #3f51b5' : 'none',
                   position: 'relative'
                 }}
@@ -203,11 +202,11 @@ const ProductList = ({ category, toggleSelection, selectedProducts }) => {
                     </IconButton>
                   </Box>
                   
-                  <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <Box sx={{ mt: 1, display: 'flex', justifyContent: 'left', alignItems: 'center' }}>
                     <Chip 
-                      icon={product.tipo === 'COMIDA' ? <LunchDiningIcon /> : <LocalCafeIcon />}
+                      icon={product.tipo === 'comida' ? <LunchDiningIcon /> : <LocalCafeIcon />}
                       label={product.tipo}
-                      color={product.tipo === 'COMIDA' ? 'primary' : 'secondary'}
+                      color={product.tipo === 'comida' ? 'primary' : 'secondary'}
                       size="small"
                       variant="outlined"
                       sx={{ mr: 1 }}
