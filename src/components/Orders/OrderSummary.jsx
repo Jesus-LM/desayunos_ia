@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   Typography, Box, Divider, List, ListItem, ListItemText,
   Paper, Table, TableBody, TableCell, TableContainer, TableHead,
@@ -7,8 +7,31 @@ import {
 import FastfoodIcon from '@mui/icons-material/Fastfood';
 import LunchDiningIcon from '@mui/icons-material/LunchDining';
 import LocalCafeIcon from '@mui/icons-material/LocalCafe';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '../../firebase/config';
 
-const OrderSummary = ({ order }) => {
+
+const OrderSummary = ({ order: initialOrder }) => {
+  const [order, setOrder] = useState(initialOrder);
+ 
+  useEffect(() => {
+    if (!initialOrder || !initialOrder.id) return;
+    
+    // Configurar un listener en tiempo real para el documento del pedido
+    const orderRef = doc(db, 'PEDIDOS', initialOrder.id);
+    const unsubscribe = onSnapshot(orderRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setOrder({ id: docSnap.id, ...docSnap.data() });
+      }
+    }, (error) => {
+      console.error("Error al escuchar cambios del pedido:", error);
+
+    });
+    
+    // Limpiar el listener cuando el componente se desmonte
+    return () => unsubscribe();
+  }, [initialOrder?.id]);
+
   // Calcular el resumen de productos agrupados por tipo y ordenados
   const productSummary = useMemo(() => {
     if (!order || !order.usuarios) return [];
@@ -69,9 +92,9 @@ const OrderSummary = ({ order }) => {
     };
     
     productSummary.forEach(producto => {
-      if (producto.tipo === 'COMIDA') {
+      if (producto.tipo === 'comida') {
         result.COMIDA += producto.cantidad;
-      } else if (producto.tipo === 'BEBIDA') {
+      } else if (producto.tipo === 'bebida') {
         result.BEBIDA += producto.cantidad;
       }
     });
@@ -109,7 +132,6 @@ const OrderSummary = ({ order }) => {
         <Table aria-label="tabla de resumen de productos">
           <TableHead>
             <TableRow>
-              <TableCell><strong>Tipo</strong></TableCell>
               <TableCell><strong>Producto</strong></TableCell>
               <TableCell align="center"><strong>Cantidad</strong></TableCell>
             </TableRow>
@@ -118,15 +140,6 @@ const OrderSummary = ({ order }) => {
             {productSummary.length > 0 ? (
               productSummary.map((product, index) => (
                 <TableRow key={index}>
-                  <TableCell>
-                    <Chip 
-                      icon={product.tipo === 'COMIDA' ? <FastfoodIcon /> : <LocalCafeIcon />}
-                      label={product.tipo}
-                      color={product.tipo === 'COMIDA' ? 'primary' : 'secondary'}
-                      size="small"
-                      variant="outlined"
-                    />
-                  </TableCell>
                   <TableCell>{product.nombre}</TableCell>
                   <TableCell align="center">
                     <Chip 
@@ -134,18 +147,6 @@ const OrderSummary = ({ order }) => {
                       color="default"
                       size="small"
                     />
-                  </TableCell>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                      {product.orderedBy.map((person, idx) => (
-                        <Chip 
-                          key={idx}
-                          label={person}
-                          size="small"
-                          variant="outlined"
-                        />
-                      ))}
-                    </Box>
                   </TableCell>
                 </TableRow>
               ))

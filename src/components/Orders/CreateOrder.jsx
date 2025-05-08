@@ -32,32 +32,23 @@ const CreateOrder = () => {
 
     try {
       setLoading(true);
-      setError('');
-      
-      // Crear el pedido usando la función de firestore.js
-      await crearPedido(
-        orderName.trim(),
-        currentUser.email,
-        [] // Productos iniciales (vacío)
-      );
-      
-      console.log('Pedido creado con éxito');
-      
-      setSuccess(true);
-      setOrderName('');
-      
-      // Redirigir después de mostrar mensaje de éxito
-      setTimeout(() => {
-        navigate('/orders');
-      }, 1500);
-      
-    } catch (err) {
-      console.error('Error al crear pedido:', err);
-      setError(`Error al crear el pedido: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
+      setError('');     
+      // Crear el pedido con estructura correcta
+ const pedidoId=await crearPedido(orderName.trim(),currentUser.email,[])
+ setSuccess(true);
+ setOrderName('');
+ // Redirigir al detalle del pedido recién creado
+  setTimeout(() => {
+   navigate(`/orders/${pedidoId}`);
+ }, 1500);
+ 
+} catch (err) {
+ console.error('Error al crear pedido:', err);
+ setError(`Error al crear el pedido: ${err.message}`);
+} finally {
+ setLoading(false);
+}
+};
 
   const handleCloseSnackbar = () => {
     setSuccess(false);

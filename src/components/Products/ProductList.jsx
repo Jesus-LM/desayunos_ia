@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Grid, Card, CardContent, Typography, IconButton, 
-  TextField, InputAdornment, Box, CircularProgress, 
-  Checkbox, FormControlLabel, Chip
+  Grid, Card, CardContent, CardActionArea, Typography, IconButton, 
+  TextField, InputAdornment, Box, CircularProgress, Chip
 } from '@mui/material';
 import LunchDiningIcon from '@mui/icons-material/LunchDining';
 import SearchIcon from '@mui/icons-material/Search';
@@ -13,7 +12,7 @@ import { collection, getDocs, query, where, doc, getDoc, updateDoc, arrayUnion, 
 import { db } from '../../firebase/config';
 import { useAuth } from '../../hooks/useAuth';
 
-const ProductList = ({ category, selectedProducts }) => {
+const ProductList = ({ category, toggleSelection, selectedProducts }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,7 +40,7 @@ const ProductList = ({ category, selectedProducts }) => {
         // Ahora cargar los productos según la categoría
         let productsQuery;
         
-        if (category === 'FAVORITOS') {
+        if (category === 'favoritos') {
           if (userFavorites.length === 0) {
             setProducts([]);
             setLoading(false);
@@ -167,7 +166,7 @@ const ProductList = ({ category, selectedProducts }) => {
       {filteredProducts.length === 0 ? (
         <Box sx={{ textAlign: 'center', p: 3 }}>
           <Typography variant="body1" color="textSecondary">
-            {category === 'FAVORITOS' 
+            {category === 'favoritos' 
               ? 'No tienes productos favoritos aún'
               : 'No se encontraron productos'}
           </Typography>
@@ -177,6 +176,11 @@ const ProductList = ({ category, selectedProducts }) => {
           {filteredProducts.map((product) => (
             <Grid  display="flex" justifyContent="center" alignItems="center"  size={{ xs: 12, sm: 6, md:4 }} key={product.id}>
               <Card 
+                 onClick={(e) => {
+                   if (!e.target.closest('.favorite-star')) { // Ignora clics en la estrella
+                     toggleSelection(product);
+                   }
+                 }}
                 elevation={isProductSelected(product.id) ? 3 : 1}
                 sx={{
                   height: '100%',
@@ -185,12 +189,13 @@ const ProductList = ({ category, selectedProducts }) => {
                   position: 'relative'
                 }}
               >
-                <CardContent>
+                <CardContent> 
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="h6" component="h3" noWrap>
                       {product.nombre}
                     </Typography>
                     <IconButton 
+                      className="favorite-star"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleToggleFavorite(product);
@@ -201,7 +206,6 @@ const ProductList = ({ category, selectedProducts }) => {
                       {favorites.includes(product.id) ? <StarIcon /> : <StarBorderIcon />}
                     </IconButton>
                   </Box>
-                  
                   <Box sx={{ mt: 1, display: 'flex', justifyContent: 'left', alignItems: 'center' }}>
                     <Chip 
                       icon={product.tipo === 'comida' ? <LunchDiningIcon /> : <LocalCafeIcon />}
@@ -211,9 +215,7 @@ const ProductList = ({ category, selectedProducts }) => {
                       variant="outlined"
                       sx={{ mr: 1 }}
                     />
-                  </Box>
-                  
-
+                  </Box>                 
                 </CardContent>
               </Card>
             </Grid>

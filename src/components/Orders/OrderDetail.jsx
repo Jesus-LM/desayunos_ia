@@ -3,18 +3,20 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   Container, IconButton, Typography, Box, CircularProgress, Tabs, Tab,
   Button, Card, CardContent, Divider, List, ListItem, ListItemText,
-  Dialog, DialogTitle, DialogContent, DialogActions
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  ListItemIcon
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LunchDiningIcon from '@mui/icons-material/LunchDining';
 import LocalCafeIcon from '@mui/icons-material/LocalCafe';
 import ReceiptLongIcon from '@mui/icons-material/Summarize';
 import GradeIcon from '@mui/icons-material/Grade';
-import { doc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { doc, getDoc} from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { useAuth } from '../../hooks/useAuth';
-import ProductList from '../Products/ProducList';
+import ProductList from '../Products/ProductList';
 import OrderSummary from './OrderSummary'
+import { actualizarProductosEnPedido } from '../../firebase/firestore';
 
 const OrderDetail = () => {
   const { orderId } = useParams();
@@ -23,11 +25,10 @@ const OrderDetail = () => {
   
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(2);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [summaryOpen, setSummaryOpen] = useState(false);
-  const [userParticipating, setUserParticipating] = useState(false);
-  const [userProductsInOrder, setUserProductsInOrder] = useState([]);
+
 
   // Cargar datos del pedido
   useEffect(() => {
@@ -52,12 +53,9 @@ const OrderDetail = () => {
           // Verificar si el usuario ya está participando
           const userParticipant = orderData.usuarios?.find(
             p => p.id === currentUser.email
-          );
-          
-          setUserParticipating(!!userParticipant);
-          
+          );         
           if (userParticipant) {
-            setUserProductsInOrder(userParticipant.productos || []);
+            setSelectedProducts(userParticipant.productos || []);
           }
         } else {
           navigate('/orders');
@@ -70,7 +68,9 @@ const OrderDetail = () => {
     };
 
     fetchOrderData();
-  }, [orderId, currentUser, navigate]);
+  }, [orderId, currentUser, navigate, selectedProducts]);
+
+  
 
   // Manejar cambio de pestaña
   const handleTabChange = (event, newValue) => {
@@ -78,57 +78,65 @@ const OrderDetail = () => {
   };
 
   // Añadir o quitar producto de la selección
-  const toggleProductSelection = (product) => {
+  const toggleProductSelection = async (product) => {
+    let newSelectedProducts;
+    
     setSelectedProducts(prevSelected => {
       const isAlreadySelected = prevSelected.some(p => p.id === product.id);
       
       if (isAlreadySelected) {
-        return prevSelected.filter(p => p.id !== product.id);
+        newSelectedProducts = prevSelected.filter(p => p.id !== product.id);
       } else {
-        return [...prevSelected, product];
+        newSelectedProducts = [...prevSelected, product];
       }
+      
+      return newSelectedProducts;
     });
+    
+    // Esperamos a que setSelectedProducts termine para tener el valor actualizado
+    setTimeout(() => {
+      actualizarProductosEnPedido(orderId,currentUser.email,newSelectedProducts);
+    }, 0);
   };
-
+  
   // Unirse al pedido o actualizar productos
-  const handleSaveOrder = async () => {
-    try {
-      setLoading(true);
-      const orderRef = doc(db, 'PEDIDOS', orderId);
+  // const handleSaveOrder = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const orderRef = doc(db, 'PEDIDOS', orderId);
       
-      if (!userParticipating) {
-        // Añadir usuario como nuevo participante
-        await updateDoc(orderRef, {
-          usuarios: arrayUnion({
-            id: currentUser.email,
-            nombre: currentUser.displayName || currentUser.email,
-            productos: selectedProducts
-          })
-        });
-        setUserParticipating(true);
-      } else {
-        // Actualizar productos del usuario
-        const updatedOrder = { ...order };
-        const participantIndex = updatedOrder.usuarios.findIndex(
-          p => p.id === currentUser.email
-        );
+  //     if (!userParticipating) {
+  //       // Añadir usuario como nuevo participante
+  //       await updateDoc(orderRef, {
+  //         usuarios: arrayUnion({
+  //           id: currentUser.email,
+  //           nombre: currentUser.displayName || currentUser.email,
+  //           productos: selectedProducts
+  //         })
+  //       });
+  //       setUserParticipating(true);
+  //     } else {
+  //       // Actualizar productos del usuario
+  //       const updatedOrder = { ...order };
+  //       const participantIndex = updatedOrder.usuarios.findIndex(
+  //         p => p.id === currentUser.email
+  //       );
         
-        if (participantIndex !== -1) {
-          updatedOrder.usuarios[participantIndex].productos = selectedProducts;
+  //       if (participantIndex !== -1) {
+  //         updatedOrder.usuarios[participantIndex].productos = selectedProducts;
           
-          await updateDoc(orderRef, {
-            usuarios: updatedOrder.usuarios
-          });
-        }
-      }
+  //         await updateDoc(orderRef, {
+  //           usuarios: updatedOrder.usuarios
+  //         });
+  //       }
+  //     }
       
-      setUserProductsInOrder(selectedProducts);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error al guardar el pedido:", error);
-      setLoading(false);
-    }
-  };
+  //     setLoading(false);
+  //   } catch (error) {
+  //     console.error("Error al guardar el pedido:", error);
+  //     setLoading(false);
+  //   }
+  // };
 
   // Abrir/cerrar diálogo de resumen
   const toggleSummary = () => {
@@ -207,21 +215,21 @@ const OrderDetail = () => {
         <Box sx={{ py: 3 }}>
           {activeTab === 0 && (
             <ProductList 
-              category="COMIDA" 
+              category="comida" 
               toggleSelection={toggleProductSelection} 
               selectedProducts={selectedProducts}
             />
           )}
           {activeTab === 1 && (
             <ProductList 
-              category="BEBIDA" 
+              category="bebida" 
               toggleSelection={toggleProductSelection} 
               selectedProducts={selectedProducts}
             />
           )}
           {activeTab === 2 && (
             <ProductList 
-              category="FAVORITOS" 
+              category="favoritos" 
               toggleSelection={toggleProductSelection} 
               selectedProducts={selectedProducts}
             />
@@ -230,19 +238,25 @@ const OrderDetail = () => {
               <Typography fontWeight="bold" color="primary" align="center" variant="h5" gutterBottom>
                 Mi Selección
               </Typography>
-              <Divider sx={{ my: 2 }} />
+              <Divider sx={{ my: 2, fontWeight:"bold", }} />
             
-              {userProductsInOrder.length > 0 ? (
-                <List>
-                  {userProductsInOrder.map((product, index) => (
+              {selectedProducts.length > 0 ? (
+                <Card>
+                <List >
+                  {selectedProducts .map((product, index) => (
                     <ListItem key={index}>
-                      <ListItemText 
+                      <ListItemText sx={{my:0}}
                         primary={product.nombre} 
-                        secondary={product.tipo} 
                       />
+                      <ListItemIcon>
+
+                      </ListItemIcon>
                     </ListItem>
+                   
                   ))}
+                  
                 </List>
+                </Card>
               ) : (
                 <Typography>
                   No has seleccionado ningún producto todavía
@@ -250,18 +264,6 @@ const OrderDetail = () => {
               )}
             </Box>
           
-        </Box>
-        
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-          <Button 
-            variant="contained" 
-            color="primary" 
-            onClick={handleSaveOrder}
-            disabled={loading}
-            sx={{ px: 4 }}
-          >
-            {userParticipating ? 'Actualizar Mi Pedido' : 'Unirme al Pedido'}
-          </Button>
         </Box>
       </Box>
 
