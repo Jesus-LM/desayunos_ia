@@ -1,10 +1,12 @@
 import React from 'react';
+import { useEffect,useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { 
   AppBar, Toolbar, Typography, IconButton, Container, 
   Box, Menu, MenuItem, Avatar, Button, Divider 
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import EditIcon from '@mui/icons-material/Edit';
 import FastfoodIcon from '@mui/icons-material/Fastfood';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useAuth } from '../../hooks/useAuth';
@@ -13,8 +15,29 @@ import { getUsuario } from '../../firebase/firestore';
 const MainLayout = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [userMenuAnchor, setUserMenuAnchor] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [userMenuAnchor, setUserMenuAnchor] = useState(null);
+  const [userData,setUserData] = useState(null)
+    
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (currentUser && currentUser.email) {
+        try {
+          const usuario = await getUsuario(currentUser.email);
+          if (usuario) {
+            setUserData(usuario);
+          }
+        } catch (error) {
+          console.error("Error al obtener datos del usuario:", error);
+        }
+      }
+    };
+    
+    fetchUserData();
+  }, [currentUser]);
+  
+  // Determinar qué nombre mostrar
+  const displayName = userData?.nombre || currentUser?.displayName || currentUser?.email;
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -75,7 +98,7 @@ const MainLayout = () => {
           {currentUser && (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Typography variant="body2" sx={{ mr: 1, display: { xs: 'none', sm: 'block' } }}>
-                {currentUser.displayName || currentUser.email}
+                {displayName}
               </Typography>
               <IconButton 
                 color="inherit"
@@ -108,9 +131,14 @@ const MainLayout = () => {
         open={Boolean(userMenuAnchor)}
         onClose={handleUserMenuClose}
       >
-        <Box sx={{ px: 2, py: 1 }}>
-          <Typography variant="subtitle1">{currentUser?.displayName || 'Usuario'}</Typography>
-          <Typography variant="body2" color="text.secondary">{currentUser?.email}</Typography>
+        <Box onClick={handleLogout}
+          sx={{ px: 2, py: 1 , display:'flex', 
+              justifyContent:'center', alignContent:'space-between'
+              }}>
+          <Typography variant="subtitle1">Editar
+          </Typography>
+          <EditIcon
+          />
         </Box>
         <Divider />
         <MenuItem onClick={handleLogout}>Cerrar sesión</MenuItem>

@@ -1,10 +1,9 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import {
-  Typography, Box, Divider, List, ListItem, ListItemText,
+  Typography, Box, Divider, List, ListItem, ListItemText, ListItemButton,
   Paper, Table, TableBody, TableCell, TableContainer, TableHead,
-  TableRow, Chip
+  TableRow, Chip,Card,CardContent, Button,Dialog, DialogTitle, DialogContent, DialogActions
 } from '@mui/material';
-import FastfoodIcon from '@mui/icons-material/Fastfood';
 import LunchDiningIcon from '@mui/icons-material/LunchDining';
 import LocalCafeIcon from '@mui/icons-material/LocalCafe';
 import { doc, onSnapshot } from 'firebase/firestore';
@@ -13,6 +12,8 @@ import { db } from '../../firebase/config';
 
 const OrderSummary = ({ order: initialOrder }) => {
   const [order, setOrder] = useState(initialOrder);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
  
   useEffect(() => {
     if (!initialOrder || !initialOrder.id) return;
@@ -30,7 +31,16 @@ const OrderSummary = ({ order: initialOrder }) => {
     
     // Limpiar el listener cuando el componente se desmonte
     return () => unsubscribe();
-  }, [initialOrder?.id]);
+  }, [initialOrder]);
+
+  const handleUserClick = (usuario) => {
+    setSelectedUser(usuario);
+    setDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+  };
 
   // Calcular el resumen de productos agrupados por tipo y ordenados
   const productSummary = useMemo(() => {
@@ -162,6 +172,74 @@ const OrderSummary = ({ order: initialOrder }) => {
           </TableBody>
         </Table>
       </TableContainer>
+
+       <Divider sx={{ my: 2 }} />
+            
+            <Card sx={{ mb: 4 }}>
+              <CardContent>
+                
+                <Typography textAlign='center' variant="body1" gutterBottom>
+                  <strong>Participantes ({order?.usuarios?.length || 0})</strong>
+                </Typography>
+                
+                <List dense>
+                  {order?.usuarios?.map((usuario, index) => (
+                    <ListItem 
+                      key={index}            
+                    >
+                      <ListItemButton 
+                        key={index}
+                        onClick={() => handleUserClick(usuario)}
+                      >
+                        <ListItemText 
+                          primary={usuario.nombre || usuario.id} 
+                          secondary={`${usuario.productos?.length || 0} productos seleccionados`} 
+                        />
+                      </ListItemButton>
+                      
+                    </ListItem>
+                  ))}
+                </List>
+              </CardContent>
+            </Card>
+      {/* Diálogo para mostrar productos de un participante */}
+            <Dialog
+              open={dialogOpen}
+              onClose={handleCloseDialog}
+              aria-labelledby="user-products-dialog-title"
+              maxWidth="sm"
+              fullWidth
+            >
+              <DialogTitle id="user-products-dialog-title">
+                <Typography variant="h6" component="div" align="center">
+                  Productos seleccionados por {selectedUser?.nombre || selectedUser?.id}
+                </Typography>
+              </DialogTitle>
+              <DialogContent dividers>
+                {selectedUser && selectedUser.productos && selectedUser.productos.length > 0 ? (
+                  <List>
+                    {selectedUser.productos.map((producto, index) => (
+                      <ListItem key={index}>
+                        <ListItemText
+                          primary={producto.nombre}
+                          secondary={producto.tipo}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                ) : (
+                  <Typography align="center" color="textSecondary">
+                    Este participante no ha seleccionado productos
+                  </Typography>
+                )}
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleCloseDialog} color="primary">
+                  Cerrar
+                </Button>
+              </DialogActions>
+            </Dialog>
+
     </Box>
   );
 };

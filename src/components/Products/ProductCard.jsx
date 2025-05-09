@@ -13,7 +13,6 @@ import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import RemoveShoppingCartIcon from '@mui/icons-material/RemoveShoppingCart';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import FastfoodIcon from '@mui/icons-material/Fastfood';
 import LunchDiningIcon from '@mui/icons-material/LunchDining';
 import LocalBarIcon from '@mui/icons-material/LocalBar';
 import { useFavorites } from '../../hooks/useFavorites';

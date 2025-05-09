@@ -1,6 +1,6 @@
 // src/hooks/useFavorites.js
 import { useState, useEffect } from 'react';
-import { doc, updateDoc, getDoc } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useAuth } from '../hooks/useAuth';
 

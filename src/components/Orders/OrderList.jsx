@@ -157,7 +157,7 @@ const OrderList = () => {
                     
                     <Divider sx={{ my: 1 }} />
                     
-                    <Typography variant="body2" color="textSecondary">
+                    <Typography  variant="body2" textAlign='center' color="textSecondary">
                       <strong>Participantes:</strong>
                     </Typography>
                     
