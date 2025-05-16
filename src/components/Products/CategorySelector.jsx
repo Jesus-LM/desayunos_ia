@@ -45,14 +45,14 @@ const CategorySelector = ({ selectedCategory, onCategoryChange, hasFavorites }) 
       >
         <ToggleButton value="COMIDA" aria-label="comida">
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <FastfoodIcon color={selectedCategory === 'COMIDA' ? 'success' : 'action'} />
+            <FastfoodIcon color={selectedCategory === 'COMIDA' ? 'comida' : 'action'} />
             <Typography variant="body2" sx={{ mt: 0.5 }}>Comida</Typography>
           </Box>
         </ToggleButton>
         
         <ToggleButton value="BEBIDA" aria-label="bebida">
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <LocalBarIcon color={selectedCategory === 'BEBIDA' ? 'primary' : 'action'} />
+            <LocalBarIcon color={selectedCategory === 'BEBIDA' ? 'bebida' : 'action'} />
             <Typography variant="body2" sx={{ mt: 0.5 }}>Bebida</Typography>
           </Box>
         </ToggleButton>

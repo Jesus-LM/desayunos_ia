@@ -7,7 +7,7 @@ import {
   Button, Chip, Divider 
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import DeleteIcon from '@mui/icons-material/Delete';
+import ClearIcon from '@mui/icons-material/Clear';
 import { collection, onSnapshot, query, orderBy,deleteDoc,doc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { useAuth } from '../../hooks/useAuth';
@@ -98,21 +98,24 @@ const OrderList = () => {
   }
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 3 }}>
+    <Container maxWidth="md" sx={{ mt: 1, mb: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 4 }}>
         <Button 
           variant="contained" 
           color="primary" 
           startIcon={<AddCircleOutlineIcon />}
           component={RouterLink} 
           to="/orders/create"
+          
         >
+          <Typography  fontSize='large' component='h2'>
           Nuevo Pedido
+          </Typography>
         </Button>
       </Box>
 
       {orders.length === 0 ? (
-        <Box sx={{ textAlign: 'center', mt: 4, p: 3, bgcolor: 'background.paper', borderRadius: 2 }}>
+        <Box sx={{ textAlign: 'center', mt: 2, p: 3, bgcolor: 'background.paper', borderRadius: 2 }}>
           <Typography variant="h6">
             No hay pedidos activos
           </Typography>
@@ -131,15 +134,14 @@ const OrderList = () => {
                     position: 'absolute', 
                     top: 8, 
                     right: 8, 
-                    fontWeight: 'bold',
-                    color: 'error.main',
+                    color: 'red',
                     zIndex: 1,
                     bgcolor: 'background.paper',
                     '&:hover': { bgcolor: 'error.lighter' }
                   }}
                   onClick={(e) => handleDeleteClick(e, order)}
                 >
-                  <DeleteIcon/>
+                  <ClearIcon/>
                 </IconButton>
                 <CardActionArea 
                   component={RouterLink} 
@@ -147,28 +149,29 @@ const OrderList = () => {
                   sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
                 >
                   <CardContent sx={{ flexGrow: 1 }}>
-                    <Typography fontWeight="500" color="primary" display="flex" justifyContent="center" variant="h5" component="h2" gutterBottom noWrap>
+                    <Typography color="primary" display="flex" justifyContent="center" variant="h4" component="h2" gutterBottom noWrap>
                       {order.nombre}
                     </Typography>
                     
-                    <Typography display="flex" justifyContent="center" variant="caption" color="textSecondary" sx={{ mb: 1 }}>
+                    <Typography fontSize='medium' display="flex" justifyContent="center" variant="caption" color="black" sx={{ mb: 1 }}>
                       Creado: {formatDate(order.fechaCreacion)}
                     </Typography>
                     
                     <Divider sx={{ my: 1 }} />
                     
-                    <Typography  variant="body2" textAlign='center' color="textSecondary">
+                    <Typography  variant="h6" textAlign='center' color="secondary.light">
                       <strong>Participantes:</strong>
                     </Typography>
                     
-                    <Box sx={{ mt: 1 }}>
+                    <Box sx={{ mt: 1, display:'flex', justifyContent:'center'}}>
                       {order.usuarios && order.usuarios.length > 0 ? (
                         order.usuarios.map((usuario, index) => (
                           <Chip 
                             key={index}
                             label={usuario.nombre}
-                            size="small"
+                            size="medium"
                             sx={{ m: 0.5 }}
+                            color='primary'
                           />
                         ))
                       ) : (

@@ -29,6 +29,16 @@ const theme = createTheme({
     background: {
       default: '#f5f5f5', // Un fondo gris muy claro
     },
+    comida: {
+      main: '#fbc02d', 
+    },
+    bebida: {
+      main: '#6d4c41', 
+    },
+  
+    favoritos: {
+      main: '#f44336', 
+    },
   },
   typography: {
     fontFamily: [

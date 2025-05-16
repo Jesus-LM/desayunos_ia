@@ -8,11 +8,12 @@ import SearchIcon from '@mui/icons-material/Search';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import LocalCafeIcon from '@mui/icons-material/LocalCafe';
-import { collection, getDocs, query, where, doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { useAuth } from '../../hooks/useAuth';
 
 const ProductList = ({ category, toggleSelection, selectedProducts }) => {
+  const [allProducts, setAllProducts] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,12 +22,11 @@ const ProductList = ({ category, toggleSelection, selectedProducts }) => {
 
   // Cargar productos y favoritos del usuario
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchAllData = async () => {
       if (!currentUser) return;
       
       try {
         setLoading(true);
-        
         // Primero cargar los favoritos del usuario
         const userRef = doc(db, 'USUARIOS', currentUser.email);
         const userSnap = await getDoc(userRef);
@@ -36,50 +36,26 @@ const ProductList = ({ category, toggleSelection, selectedProducts }) => {
           userFavorites = userSnap.data().favoritos || [];
           setFavorites(userFavorites);
         }
+
+        // Cargar todos los productos
+        const productsQuery = collection(db, 'PRODUCTOS');
+        const querySnapshot = await getDocs(productsQuery);
         
-        // Ahora cargar los productos según la categoría
-        let productsQuery;
+        const productsData = [];
+        querySnapshot.forEach((doc) => {
+          productsData.push({
+            id: doc.id,
+            ...doc.data(),
+            isFavorite: userFavorites.includes(doc.id)
+          });
+        });
+
+        // Ordenar alfabéticamente por nombre
+        const productosOrdenados = productsData.sort((a, b) => 
+        a.nombre.localeCompare(b.nombre)
+      );
         
-        if (category === 'favoritos') {
-          if (userFavorites.length === 0) {
-            setProducts([]);
-            setLoading(false);
-            return;
-          }
-          
-          // Cargar todos los productos y filtrar por favoritos
-          productsQuery = collection(db, 'PRODUCTOS');
-          const querySnapshot = await getDocs(productsQuery);
-          
-          const productsData = [];
-          querySnapshot.forEach((doc) => {
-            const productData = { id: doc.id, ...doc.data() };
-            if (userFavorites.includes(doc.id)) {
-              productsData.push(productData);
-            }
-          });
-          
-          setProducts(productsData);
-        } else {
-          // Cargar productos por tipo específico
-          productsQuery = query(
-            collection(db, 'PRODUCTOS'),
-            where('tipo', '==', category)
-          );
-          
-          const querySnapshot = await getDocs(productsQuery);
-          const productsData = [];
-          
-          querySnapshot.forEach((doc) => {
-            productsData.push({
-              id: doc.id,
-              ...doc.data(),
-              isFavorite: userFavorites.includes(doc.id)
-            });
-          });
-          
-          setProducts(productsData);
-        }
+        setAllProducts(productosOrdenados);
       } catch (error) {
         console.error("Error al cargar productos:", error);
       } finally {
@@ -87,13 +63,24 @@ const ProductList = ({ category, toggleSelection, selectedProducts }) => {
       }
     };
 
-    fetchData();
-  }, [currentUser, category]);
+    fetchAllData();
+  }, [currentUser]);
 
-  // Filtrar productos por término de búsqueda
-  const filteredProducts = products.filter(product => 
-    product.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+// Filtrar productos según categoría y término de búsqueda
+  useEffect(() => {
+    if (searchTerm.trim()) {
+      // Si hay término de búsqueda, mostrar coincidencias de todas las categorías
+      setProducts(allProducts.filter(product => 
+        product.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+      ));
+    } else if (category === 'favoritos') {
+      // Si estamos en la pestaña de favoritos, mostrar solo los favoritos
+      setProducts(allProducts.filter(product => favorites.includes(product.id)));
+    } else {
+      // Si no hay búsqueda, filtrar por categoría
+      setProducts(allProducts.filter(product => product.tipo === category));
+    }
+  }, [category, searchTerm, allProducts, favorites]);
 
   // Verificar si un producto está seleccionado
   const isProductSelected = (productId) => {
@@ -123,7 +110,7 @@ const ProductList = ({ category, toggleSelection, selectedProducts }) => {
       }
       
       // Actualizar la vista de productos
-      setProducts(prevProducts => 
+      setAllProducts(prevProducts => 
         prevProducts.map(p => 
           p.id === product.id 
             ? { ...p, isFavorite: !isFavorite }
@@ -163,17 +150,19 @@ const ProductList = ({ category, toggleSelection, selectedProducts }) => {
         />
       </Box>
 
-      {filteredProducts.length === 0 ? (
+      {products.length === 0 ? (
         <Box sx={{ textAlign: 'center', p: 3 }}>
           <Typography variant="body1" color="textSecondary">
             {category === 'favoritos' 
               ? 'No tienes productos favoritos aún'
-              : 'No se encontraron productos'}
+              : searchTerm.trim()
+                ? 'No se encontraron productos que coincidan con tu búsqueda'
+                : 'No se encontraron productos en esta categoría'}
           </Typography>
         </Box>
       ) : (
         <Grid container mb={2} spacing={2}>
-          {filteredProducts.map((product) => (
+          {products.map((product) => (
             <Grid  display="flex" justifyContent="center" alignItems="center"  size={{ xs: 12, sm: 6, md:4 }} key={product.id}>
               <Card 
                  onClick={(e) => {
@@ -210,7 +199,7 @@ const ProductList = ({ category, toggleSelection, selectedProducts }) => {
                     <Chip 
                       icon={product.tipo === 'comida' ? <LunchDiningIcon /> : <LocalCafeIcon />}
                       label={product.tipo}
-                      color={product.tipo === 'comida' ? 'primary' : 'secondary'}
+                      color={product.tipo === 'comida' ? 'comida' : 'bebida'}
                       size="small"
                       variant="outlined"
                       sx={{ mr: 1 }}

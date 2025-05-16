@@ -35,6 +35,19 @@ export const getUsuario = async (email) => {
   }
 };
 
+// En firestore.js - Añade esta función
+export const asignarRolUsuario = async (email, rol) => {
+  try {
+    const userRef = doc(db, 'USUARIOS', email);
+    await updateDoc(userRef, {rol});
+    return true;
+  } catch (error) {
+    console.error("Error al asignar rol:", error);
+    throw error;
+  }
+};
+
+
 // Actualizar favoritos de un usuario
 export const toggleFavorito = async (email, productoId) => {
   try {

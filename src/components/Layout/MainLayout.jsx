@@ -1,154 +1,200 @@
 import React from 'react';
 import { useEffect,useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { 
-  AppBar, Toolbar, Typography, IconButton, Container, 
-  Box, Menu, MenuItem, Avatar, Button, Divider 
+  AppBar, Toolbar, Typography, IconButton, Container, List,ListItem,ListItemButton,
+  Box, Menu, MenuItem, Avatar, Button, Divider,Drawer,ListItemIcon,ListItemText
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import EditIcon from '@mui/icons-material/Edit';
+import { useRol} from '../../hooks/useRol';
+import { Link, useLocation } from 'react-router-dom';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import FastfoodIcon from '@mui/icons-material/Fastfood';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import RestaurantIcon from '@mui/icons-material/Restaurant';
 import { useAuth } from '../../hooks/useAuth';
 import { getUsuario } from '../../firebase/firestore';
+import UserProfile from '../UI/UserProfile';
 
-const MainLayout = () => {
-  const { currentUser, logout } = useAuth();
-  const navigate = useNavigate();
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [userMenuAnchor, setUserMenuAnchor] = useState(null);
+const MainLayout = ({children}) => {
+  const [loading, setLoading] = useState(true);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const { currentUser} = useAuth();
+  const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [userData,setUserData] = useState(null)
+  const { isAdmin } = useRol();
+  const drawerWidth = 240;
     
   useEffect(() => {
     const fetchUserData = async () => {
       if (currentUser && currentUser.email) {
         try {
+          setLoading(true);
           const usuario = await getUsuario(currentUser.email);
           if (usuario) {
             setUserData(usuario);
+          } else {
+            // Si no hay datos en Firestore, usar los datos de Auth
+            setUserData({
+              id: currentUser.email,
+              nombre: currentUser.displayName || currentUser.email,
+              email: currentUser.email
+            });
           }
         } catch (error) {
           console.error("Error al obtener datos del usuario:", error);
+          // En caso de error, usar datos de Auth como fallback
+          setUserData({
+            id: currentUser.email,
+            nombre: currentUser.displayName || currentUser.email,
+            email: currentUser.email
+          });
+        } finally {
+          setLoading(false);
         }
       }
     };
-    
     fetchUserData();
   }, [currentUser]);
   
   // Determinar qué nombre mostrar
-  const displayName = userData?.nombre || currentUser?.displayName || currentUser?.email;
+  // const displayName = userData?.nombre || currentUser?.displayName || currentUser?.email;
 
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
+    const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
   };
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
 
-  const handleUserMenuOpen = (event) => {
-    setUserMenuAnchor(event.currentTarget);
-  };
-
-  const handleUserMenuClose = () => {
-    setUserMenuAnchor(null);
-  };
-
-  const handleNavigate = (path) => {
-    handleMenuClose();
-    navigate(path);
-  };
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/login');
-    } catch (error) {
-      console.error("Error al cerrar sesión:", error);
-    }
-  };
-
-  return (
-    <>
-      <AppBar position="static" color="primary">
-        <Toolbar
-          sx={{
-            
-            display: 'flex',
-            justifyContent: 'space-between'
-          }}
+const drawer = (
+    <div>
+      <Toolbar>
+        <Typography variant="h6" noWrap component="div">
+          Desayunos App
+        </Typography>
+      </Toolbar>
+      <Divider />
+      <List>
+        <ListItemButton
+          component={Link} 
+          to="/orders"
+          selected={location.pathname.startsWith('/orders')}
+          onClick={() => {
+            if (mobileOpen) {
+              handleDrawerToggle();
+             }
+            }}
         >
-          <Typography  variant="h6" component="div" >
+          <ListItemIcon>
+            <RestaurantIcon />
+          </ListItemIcon>
+          <ListItemText primary="Pedidos" />
+        </ListItemButton>
+        
+        {isAdmin && (
+          <ListItemButton
+            component={Link} 
+            to="/admin"
+            selected={location.pathname.startsWith('/admin')}
+              onClick={() => {
+            if (mobileOpen) {
+              handleDrawerToggle();
+               }}}
+          >
+            <ListItemIcon>
+              <AdminPanelSettingsIcon />
+            </ListItemIcon>
+            <ListItemText primary="Administrar" />
+          </ListItemButton>
+        )}
+      </List>
+    </div>
+  );
+
+  // Excluir el layout en la página de login
+  if (location.pathname === '/login') {
+    return children;
+  }
+
+ return (
+    <Box sx={{ display: 'flex' }}>
+      <AppBar
+        position="fixed"
+        sx={{
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          ml: { sm: `${drawerWidth}px` },
+        }}
+      >
+        <Toolbar>
           <IconButton
-            size="large"
-            edge="start"
             color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2 }}
-            onClick={handleMenuOpen}
+            aria-label="open drawer"
+            edge="start"
+            onClick={handleDrawerToggle}
+            sx={{ mr: 2, display: { sm: 'none' } }}
           >
             <MenuIcon />
           </IconButton>
-          
-          <FastfoodIcon sx={{ mr: 1 }} />
-            Pedidos Desayunos
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+            {location.pathname.includes('/admin') ? 'Panel de Administración' : 'Pedidos de Desayuno'}
           </Typography>
-          
           {currentUser && (
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Typography variant="body2" sx={{ mr: 1, display: { xs: 'none', sm: 'block' } }}>
-                {displayName}
-              </Typography>
-              <IconButton 
-                color="inherit"
-                onClick={handleUserMenuOpen}
-              >
-                {currentUser.photoURL ? (
-                  <Avatar src={currentUser.photoURL} sx={{ width: 32, height: 32 }} />
-                ) : (
-                  <AccountCircleIcon />
-                )}
-              </IconButton>
-            </Box>
+           <> 
+          <IconButton onClick={() => setProfileOpen(true)}>
+            <Avatar src={currentUser.photoURL} />
+            </IconButton>
+            <UserProfile 
+              open={profileOpen} 
+              onClose={() => setProfileOpen(false)}
+              user={userData}
+              loading={loading}
+              />
+              </>
           )}
         </Toolbar>
       </AppBar>
-
-      {/* Menú principal */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
+      
+      <Box
+        component="nav"
+        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
       >
-        <MenuItem onClick={() => handleNavigate('/orders')}>Ver pedidos</MenuItem>
-        <MenuItem onClick={() => handleNavigate('/orders/create')}>Crear pedido</MenuItem>
-      </Menu>
-
-      {/* Menú de usuario */}
-      <Menu
-        anchorEl={userMenuAnchor}
-        open={Boolean(userMenuAnchor)}
-        onClose={handleUserMenuClose}
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          ModalProps={{ keepMounted: true }}
+          sx={{
+            display: { xs: 'block', sm: 'none' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+          }}
+        >
+          {drawer}
+        </Drawer>
+        <Drawer
+          variant="permanent"
+          sx={{
+            display: { xs: 'none', sm: 'block' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+          }}
+          open
+        >
+          {drawer}
+        </Drawer>
+      </Box>
+      
+      <Box
+        component="main"
+        sx={{ 
+          flexGrow: 1, 
+          p: 3, 
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          marginTop: '64px' // Altura del AppBar
+        }}
       >
-        <Box onClick={handleLogout}
-          sx={{ px: 2, py: 1 , display:'flex', 
-              justifyContent:'center', alignContent:'space-between'
-              }}>
-          <Typography variant="subtitle1">Editar
-          </Typography>
-          <EditIcon
-          />
-        </Box>
-        <Divider />
-        <MenuItem onClick={handleLogout}>Cerrar sesión</MenuItem>
-      </Menu>
-
-      {/* Contenido principal */}
-      <Container component="main" sx={{ pt: 3, pb: 4 }}>
-        <Outlet />
-      </Container>
-    </>
+        {children}
+      </Box>
+    </Box>
   );
 };
 

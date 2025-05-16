@@ -139,38 +139,76 @@ useEffect(() => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>       
+    <Container maxWidth="lg" sx={{ mt: 0, mb: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, ml:0,mr:0 }}>
+        <Box>       
          <IconButton 
             aria-label="atras" 
-            color="primary"       
+            color='primary'       
             onClick={() => navigate('/orders')}>
-            <ArrowBackIcon fontSize="large" />         
+            <ArrowBackIcon fontSize="large" color='black'/>         
         </IconButton>
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography variant="h4" component="h1">
+          <Typography color='black' variant="h4" component="h1" align='center'>
             {order?.nombre}
           </Typography>
         </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box>
         <IconButton 
           aria-label="resumen" 
-          color="primary"
           onClick={toggleSummary}
         >
-            <ReceiptLongIcon fontSize="large" />
+            <ReceiptLongIcon color="primary" fontSize="large" />
         </IconButton>
       </Box>
     </Box>
+    <Divider color='black'  sx={{ mt: 0, mb: 2 }} />
+     <Box >
+              <Typography color="black" align="center" variant="h5" gutterBottom>
+                Mi Selección
+              </Typography>
+              <Divider sx={{ my: 0, fontWeight:"bold", }} />
+            
+              {selectedProducts.length > 0 ? (
+                <Card >
+                <List >
+                  {selectedProducts .map((product, index) => (
+                    <ListItem  key={index}>
+                      <ListItemIcon 
+                        edge='start'
+                        onClick={(e) => {
+                        e.stopPropagation();
+                        toggleProductSelection(product);
+                      }}
+                        aria-label="eliminar"
+                        sx={{mr:0,color:'red'}}
+                      >
+                        <ClearIcon  />
 
-      <Box sx={{ width: '100%' }}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                      </ListItemIcon>
+                      <ListItemText sx={{margin:0}}
+                        primary={product.nombre} 
+                        />
+                      
+                    </ListItem>
+                   
+                  ))}
+                  
+                </List>
+                </Card>
+              ) : (
+                <Typography align='center'>
+                  Aun no has seleccionado ningún producto
+                </Typography>
+              )}
+            </Box>
+      <Box sx={{ width: '100%', mt:1}}>
+        <Box sx={{ borderBottom: 2, borderColor: 'divider' }}>
           <Tabs value={activeTab} onChange={handleTabChange} centered aria-label="categorías de productos">
-            <Tab label= "Comida" icon={<LunchDiningIcon/>} />
-            <Tab label="Bebida" icon={<LocalCafeIcon />} />
-            <Tab label="Favoritos" icon={<GradeIcon />} />
+            <Tab label="Comida" icon={<LunchDiningIcon color="comida"/>} />
+            <Tab label="Bebida" icon={<LocalCafeIcon color="bebida"/>} />
+            <Tab label="Favoritos" icon={<GradeIcon color="favoritos"/>} />
           </Tabs>
         </Box>
         
@@ -196,41 +234,7 @@ useEffect(() => {
               selectedProducts={selectedProducts}
             />
           )}
-            <Box >
-              <Typography fontWeight="bold" color="primary" align="center" variant="h5" gutterBottom>
-                Mi Selección
-              </Typography>
-              <Divider sx={{ my: 2, fontWeight:"bold", }} />
-            
-              {selectedProducts.length > 0 ? (
-                <Card >
-                <List >
-                  {selectedProducts .map((product, index) => (
-                    <ListItem  key={index}>
-                      <ListItemIcon 
-                        edge='end'
-                        aria-label="eliminar"
-                        sx={{color:'red', mr:0}}
-                      >
-                        <ClearIcon  />
-
-                      </ListItemIcon>
-                      <ListItemText sx={{margin:0}}
-                        primary={product.nombre} 
-                        />
-                      
-                    </ListItem>
-                   
-                  ))}
-                  
-                </List>
-                </Card>
-              ) : (
-                <Typography>
-                  No has seleccionado ningún producto todavía
-                </Typography>
-              )}
-            </Box>
+           
           
         </Box>
       </Box>
@@ -243,7 +247,7 @@ useEffect(() => {
         maxWidth="md"
       >
         <DialogTitle>
-          <Typography fontSize="2rem" fontWeight="bold" color="primary" align="center">
+          <Typography fontSize="2rem"  color="primary.dark" align="center">
             {order?.nombre}
            </Typography>
         </DialogTitle>
@@ -251,7 +255,7 @@ useEffect(() => {
           <OrderSummary order={order} />
         </DialogContent>
         <DialogActions>
-          <Button onClick={toggleSummary}>Cerrar</Button>
+          <Button color="secondary" onClick={toggleSummary}>CERRAR</Button>
         </DialogActions>
       </Dialog>
     </Container>
