@@ -11,6 +11,7 @@ import LunchDiningIcon from '@mui/icons-material/LunchDining';
 import LocalCafeIcon from '@mui/icons-material/LocalCafe';
 import ReceiptLongIcon from '@mui/icons-material/Summarize';
 import GradeIcon from '@mui/icons-material/Grade';
+import CancelIcon from '@mui/icons-material/Cancel';
 import ClearIcon from '@mui/icons-material/Clear';
 import { doc, getDoc} from 'firebase/firestore';
 import { db } from '../../firebase/config';
@@ -139,93 +140,156 @@ useEffect(() => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 0, mb: 4 }}>
-      <Box sx={{ display: 'flex',  justifyContent: 'center', alignItems: 'center', mb: 3, ml:0, mr:0 }}>
-               
-         <Fab 
-            sx={{
-              position: 'absolute',              
-              left: 4
-            }}
-            aria-label="atras" 
-            size='small'
-            color='secondary'       
-            onClick={() => navigate('/orders')}>
-            <ArrowBackIcon fontSize="large"/>         
-        </Fab>
-     
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography color='primary' variant="h4" component="h1" align='center'>
-            <strong>{order?.nombre}</strong>
-          </Typography>
-        </Box>
-        {order.creadoPor==currentUser.email ? (
-        
+<Box sx={{ 
+    width: '100%',
+    maxWidth: '100vw',
+    overflow: 'hidden',
+    px: 2, // Padding lateral mínimo
+    mt: 0, 
+    mb: 4,
+    boxSizing: 'border-box'
+  }}>
+    <Box sx={{ 
+      display: 'flex', 
+      justifyContent: 'center', 
+      alignItems: 'center', 
+      mb: 3,
+      position: 'relative',
+      width: '100%',
+      minHeight: '56px' // Altura mínima para los Fab
+    }}>
+      {/* Fab Atrás - Posición fija desde la izquierda */}
+      <Fab 
+        sx={{
+          position: 'absolute',              
+          left: 0, // Cambiar de 4 a 0
+          top: '50%',
+          transform: 'translateY(-50%)'
+        }}
+        aria-label="atras" 
+        size='small'
+        color='secondary'       
+        onClick={() => navigate('/orders')}
+      >
+        <ArrowBackIcon fontSize="large"/>         
+      </Fab>
+   
+      {/* Título - Centrado con margen para los Fab */}
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center',
+        px: 7, // Espacio para los Fab
+        textAlign: 'center',
+        width: '100%'
+      }}>
+        <Typography 
+          color='primary.dark' 
+          variant="h4"
+          component="h1" 
+          sx={{
+            fontSize: { xs: '1.75rem', sm: '2rem' },
+            lineHeight: 1.2,
+            width: '100%'
+          }}
+        >
+          {order?.nombre}
+        </Typography>
+      </Box>
+      
+      {/* Fab Resumen - Solo si es creador */}
+      {order.creadoPor === currentUser.email && (
         <Fab 
           color='primary'
           size='small'
           sx={{
-            
             position: 'absolute',              
-            right: 4
+            right: 0,
+            top: '50%',
+            transform: 'translateY(-50%)'
           }}
           aria-label="resumen" 
           onClick={toggleSummary}
         >
-            <ReceiptLongIcon  fontSize="large" />
-        </Fab> ):<Box></Box>}
+          <ReceiptLongIcon fontSize="large" />
+        </Fab>
+      )}
     </Box>
     
-              
-            <Box>
-              <Typography
-                mb='2' textAlign="center" variant='h5'><strong>Mi Selección</strong>
-                </Typography>
+
+    <Box>
+      <Typography
+        mb={2} 
+        textAlign="center" 
+        variant='h5' 
+        sx={{ fontSize: { xs: '1.5rem', sm: '1.75rem' } }}
+      >
+        <strong>Mi Selección</strong>
+      </Typography>
+    </Box>
+    
+    <Card sx={{
+      mt: 1,
+      borderRadius: 2,
+      border: '2px solid #3f51b5',
+      width: '100%',
+      maxWidth: '100%',
+      overflow: 'hidden'
+    }} elevation={5}>
+      {selectedProducts.length > 0 ? (
+        selectedProducts.sort((a, b) => a.nombre.localeCompare(b.nombre)).map((producto, index) => (
+          <Box 
+            key={index} 
+            sx={{ 
+              backgroundColor: 'white',
+              display: 'flex', 
+              alignItems: 'center',
+              py: 0.5,
+              px: 1,
+              width: '100%',
+              boxSizing: 'border-box'
+            }}
+          >
+            <Box sx={{ width: '10%', minWidth: '32px' }}>
+              <ClearIcon   
+                sx={{ 
+                  verticalAlign: 'middle',
+                  fontSize: { xs: '1.5rem', sm: '1.75rem' }
+                }}
+                color="secondary" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleProductSelection(producto);
+                }} 
+              />
             </Box>
-                <Card sx={{mt:1,
-                  borderRadius:'5',
-                  border: '2px solid #3f51b5',
-                }} elevation={5}
-                >
-
-              {selectedProducts.length > 0 ? (
-                selectedProducts.sort((a, b) => a.nombre.localeCompare(b.nombre)).map((producto, index) => (
-                        <Box 
-                          key={index} 
-                          sx={{ 
-                            backgroundColor:'white',
-                            display: 'flex', 
-                            alignItems: 'center',
-                            py:0.1,
-                            my:0
-                          }}
-                        >
-                          <Box sx={{
-                            width: '10%',
-                            
-                          }}>
-                          <ClearIcon   
-                            sx={{ verticalAlign: 'middle'}}
-                            color="secondary" 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleProductSelection(producto);
-                            }} 
-                          />
-
-                          </Box>
-                          <Box sx={{ width: '90%' }}>
-                            <Typography >{producto.nombre}</Typography>
-                        </Box>                   
-                       </Box>
-                  ))
-                  
-                ) : (
-                  <Typography align='center'>
-                  Aun no has seleccionado ningún producto
-                </Typography>
-              )}
-          </Card>
+            <Box sx={{ 
+              width: '90%',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
+              <Typography 
+                sx={{ 
+                  fontSize: { xs: '1.2rem', sm: '1.5rem' },
+                  wordBreak: 'break-word'
+                }}
+              >
+                {producto.nombre}
+              </Typography>
+            </Box>                   
+          </Box>
+        ))
+      ) : (
+        <Typography 
+          align='center'
+          sx={{ 
+            p: 2,
+            fontSize: { xs: '1.2rem', sm: '1.5rem' }
+          }}
+        >
+          Aún no has seleccionado ningún producto
+        </Typography>
+      )}
+    </Card>
            
       <Box sx={{ width: '100%', mt:1}}>
         <Box sx={{ borderBottom: 2, borderColor: 'divider' }}>
@@ -279,15 +343,18 @@ useEffect(() => {
           <OrderSummary order={order} />
         </DialogContent>
         <DialogActions>
-          <Button color="secondary" 
-                  variant="contained" 
-                  sx={{borderRadius:2}} 
+          <Button 
+                  variant="outlined" 
+                  color="secondary" 
+                  size="small"
+                  startIcon={<CancelIcon />}
+                  sx={{fontSize: '1rem', borderRadius:2,textTransform: 'none'}} 
                   onClick={toggleSummary}>
-                    CERRAR
+                    Cerrar
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
+    </Box>
   );
 };
 

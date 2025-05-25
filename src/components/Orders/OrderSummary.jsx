@@ -7,6 +7,7 @@ import {
 } from '@mui/material';
 import LunchDiningIcon from '@mui/icons-material/LunchDining';
 import LocalCafeIcon from '@mui/icons-material/LocalCafe';
+import CancelIcon from '@mui/icons-material/Cancel';
 import DownloadIcon from '@mui/icons-material/Download';
 import ShareIcon from '@mui/icons-material/Share';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
@@ -422,10 +423,12 @@ const OrderSummary = ({ order: initialOrder }) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} 
+                  variant="outlined" 
                   color="secondary" 
-                  variant="contained"
-                  sx={{borderRadius:2}}>
-            CERRAR
+                  size="small"
+                  startIcon={<CancelIcon />}
+                  sx={{fontSize: '1rem', borderRadius:2,textTransform: 'none'}}>
+            Cerrar
           </Button>
         </DialogActions>
       </Dialog>
@@ -433,7 +436,7 @@ const OrderSummary = ({ order: initialOrder }) => {
       {/* Notificaciones */}
       <Snackbar 
         open={snackbarOpen} 
-        autoHideDuration={6000} 
+        autoHideDuration={4000} 
         onClose={() => setSnackbarOpen(false)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >

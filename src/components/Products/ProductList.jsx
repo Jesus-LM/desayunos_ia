@@ -139,13 +139,16 @@ const ProductList = ({ category, toggleSelection, selectedProducts }) => {
           placeholder="Buscar productos..."
           variant="outlined"
           value={searchTerm}
+          
           onChange={(e) => setSearchTerm(e.target.value)}
-          InputProps={{
+
+          slotProps={{
+            input:{
             startAdornment: (
               <InputAdornment position="start">
                 <SearchIcon />
               </InputAdornment>
-            ),
+            )},
           }}
         />
       </Box>
@@ -180,7 +183,7 @@ const ProductList = ({ category, toggleSelection, selectedProducts }) => {
               >
                 <CardContent> 
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding:0}}>
-                    <Typography  fontFamily='Verdana' noWrap>
+                    <Typography  fontFamily='Verdana' sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' }}}>
                       {product.nombre}
                     </Typography>
                     <IconButton 

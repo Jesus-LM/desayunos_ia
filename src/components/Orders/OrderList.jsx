@@ -8,6 +8,11 @@ import {
   IconButton
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import CloseIcon from '@mui/icons-material/Close';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import CancelIcon from '@mui/icons-material/Cancel';
 import ClearIcon from '@mui/icons-material/Clear';
 import { collection, onSnapshot, query, orderBy,deleteDoc,doc } from 'firebase/firestore';
 import { db } from '../../firebase/config';
@@ -136,10 +141,9 @@ const OrderList = () => {
                   color='secondary'           
                   aria-label="eliminar pedido" 
                   sx={{ 
-                    
                     position: 'absolute', 
-                    top: 4, 
-                    right: 4, 
+                    top: 1, 
+                    right: 1, 
                   }}
                   onClick={(e) => handleDeleteClick(e, order)}
                 >
@@ -150,35 +154,60 @@ const OrderList = () => {
                   to={`/orders/${order.id}`}
                   sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
                 >
-                  <CardContent sx={{ flexGrow: 0 }}>
-                    <Typography color="primary" display="flex" justifyContent="center" variant="h4" component="h2" gutterBottom noWrap>
+                  <CardContent sx={{ flexGrow: 0, textAlign:'center'}}>
+                    <Typography   color="primary" display="flex" justifyContent='center' textAlign="center" gutterBottom 
+                      sx={{textShadow:"1px 1px 1px black, 0 0 3em blue, 0 0 0.1em",fontSize: { xs: '1.5rem', sm: '1.75rem' }}}>
                       {order.nombre}
                     </Typography>
+                    <Typography color="primary.light" display="flex" justifyContent='center' textAlign="center" gutterBottom sx={{fontSize: { xs: '1.1rem', sm: '1.35rem' }}}>
+                      Hora de reserva: {order.horaLlegada}
+                    </Typography>
                     
-                    <Typography fontSize='medium' display="flex" justifyContent="center" variant="caption" color="black" sx={{ mb: 1 }}>
+                    <Typography fontSize='medium' display="flex" justifyContent="center" variant="caption" color="black" sx={{ mb: 1, fontSize: { xs: '0.8rem', sm: '1rem' } }}>
                       Creado: {formatDate(order.fechaCreacion)}
                     </Typography>
                     
                     <Divider sx={{ my: 1 }} />
                     
                     <Typography  variant="h6" textAlign='center' color="secondary.light">
-                      <strong>Participantes:</strong>
+                      <strong>Participantes: {order.usuarios?.length || 0} </strong>
                     </Typography>
                     
-                    <Box sx={{ mt: 1, display:'flex', justifyContent:'center'}}>
-                      {order.usuarios && order.usuarios.length > 0 ? (
-                        order.usuarios.map((usuario, index) => (
-                          <Chip 
-                            key={index}
-                            label={usuario.nombre}
-                            size="medium"
-                            sx={{ m: 0.5 }}
-                            color='primary'
-                          />
-                        ))
-                      ) : (
-                        <Typography variant="body2">Sin participantes</Typography>
-                      )}
+                    <Box sx={{ mt: 1 }}>
+                      
+                      <Box sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        flexWrap: 'wrap', 
+                        gap: 0.5,
+                        maxHeight: '60px',
+                        overflow: 'hidden'
+                      }}>
+                        {order.usuarios && order.usuarios.length > 0 ? (
+                          order.usuarios.map((usuario, index) => (
+                            <Chip 
+                              key={index}
+                              label={usuario.nombre}
+                              variant="outlined"
+                              size="small"
+                              color="primary"
+                              sx={{ 
+                                fontSize: '0.75rem',
+                                height: '26px',
+                                borderRadius: 2,
+                                backgroundColor: 'rgba(63, 81, 181, 0.04)',
+                                '&:hover': {
+                                  backgroundColor: 'rgba(63, 81, 181, 0.08)'
+                                }
+                              }}
+                            />
+                          ))
+                        ) : (
+                          <Typography variant="caption" color="textSecondary">
+                            Sin participantes aún
+                          </Typography>
+                        )}
+                      </Box>
                     </Box>
                   </CardContent>
                 </CardActionArea>
@@ -199,7 +228,7 @@ const OrderList = () => {
             borderRadius: 5,}
         }}
       >
-        <DialogTitle textAlign='center' fontWeight='bold' id="alert-dialog-title">
+        <DialogTitle color='secondary' textAlign='center' fontWeight='bold' id="alert-dialog-title">
           Eliminar pedido
         </DialogTitle>
         <DialogContent>
@@ -207,26 +236,46 @@ const OrderList = () => {
             ¿Estás seguro de que deseas eliminar el pedido "{orderToDelete?.nombre}"? 
           </DialogContentText>
         </DialogContent>
-        <DialogActions sx={{
-          display:"flex",
-          justifyContent:"space-between",
-
-        }}>
-          <Button onClick={handleCloseDeleteDialog} 
-                  variant="contained"
-                  color="primary"
-                  sx={{borderRadius:4}}>
-            Cancelar
-          </Button>
-          <Button onClick={handleConfirmDelete} 
-                  variant="contained" 
-                  color="error" 
-                  autoFocus
-                  sx={{borderRadius:4}}>
-                  
-            Eliminar
-          </Button>
-        </DialogActions>
+<DialogActions sx={{
+  display: "flex",
+  justifyContent: "space-between",
+  px: 2,
+  pb: 2,
+  gap: 1,
+  
+}}>
+  <Button 
+    onClick={handleCloseDeleteDialog} 
+    variant="outlined"
+    color="primary"
+    size="small"
+    startIcon={<CloseIcon />}
+    sx={{
+      borderRadius: 3,
+      fontSize: '1rem',
+      textTransform: 'none',
+      height: '32px'
+    }}
+  >
+    Cancelar
+  </Button>
+  <Button 
+    onClick={handleConfirmDelete} 
+    variant="contained" 
+    color="error" 
+    size="small"
+    startIcon={<DeleteIcon />}
+    autoFocus
+    sx={{
+      borderRadius: 3,
+      fontSize: '1rem',
+      textTransform: 'none',
+      height: '32px'
+    }}
+  >
+    Eliminar
+  </Button>
+</DialogActions>
       </Dialog>
     </Container>
   );

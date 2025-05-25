@@ -6,7 +6,11 @@ import {
   Avatar, TextField, Button, Box, Typography,
   IconButton, InputAdornment, Snackbar, Alert, CircularProgress
 } from '@mui/material';
+
+import LogoutIcon from '@mui/icons-material/Logout';
 import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Cancel';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import LockIcon from '@mui/icons-material/Lock';
 import { doc, updateDoc, query,getDocs,where,collection } from 'firebase/firestore';
@@ -211,6 +215,7 @@ const UserProfile = ({ open, onClose, user, loading }) => {
         <Box mt={2} textAlign="center">
           <Button
             variant="outlined"
+            fullWidth
             startIcon={<LockIcon />}
             onClick={() => setPasswordDialogOpen(true)}
           >
@@ -219,24 +224,56 @@ const UserProfile = ({ open, onClose, user, loading }) => {
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{display:'flex', justifyContent:'space-between'}}>
-        {editMode ? (
-          <>
-            <Button variant="contained" color="secondary" onClick={() =>  {
-              setEditMode(false); 
-              setFormData({...formData, nombre: user.nombre});
-             }}>
-              Cancelar
-            </Button>
-            <Button variant="contained" onClick={handleUpdateProfile}>Guardar</Button>
-          </>
-        ) : (
-            <>
-                <Button variant="contained" color="secondary"  onClick={() => handleLogout()}>Cerrar Sesión</Button>
-                <Button variant="contained" onClick={() => setEditMode(true)}>Editar Perfil</Button>
-            </>
-        )}
-      </DialogActions>
+<DialogActions sx={{display:'flex', justifyContent:'space-between', px: 3, pb: 2}}>
+  {editMode ? (
+    <>
+      <Button 
+        variant="outlined" 
+        color="secondary" 
+        size="small"
+        startIcon={<CancelIcon />}
+        sx={{ fontSize: '1rem', textTransform: 'none' }}
+        onClick={() =>  {
+          setEditMode(false); 
+          setFormData({...formData, nombre: user.nombre});
+        }}
+      >
+        Cancelar
+      </Button>
+      <Button 
+        variant="contained" 
+        size="small"
+        startIcon={<SaveIcon />}
+        sx={{ fontSize: '1rem', textTransform: 'none' }}
+        onClick={handleUpdateProfile}
+      >
+        Guardar
+      </Button>
+    </>
+  ) : (
+    <>
+      <Button 
+        variant="outlined" 
+        color="error" 
+        size="small"
+        startIcon={<LogoutIcon />}
+        sx={{ fontSize: '1rem', textTransform: 'none' }}
+        onClick={() => handleLogout()}
+      >
+        Cerrar Sesión
+      </Button>
+      <Button 
+        variant="contained" 
+        size="small"
+        startIcon={<EditIcon />}
+        sx={{ fontSize: '1rem', textTransform: 'none' }}
+        onClick={() => setEditMode(true)}
+      >
+        Editar
+      </Button>
+    </>
+  )}
+</DialogActions>
 
       {/* Diálogo para cambiar contraseña */}
       <Dialog open={passwordDialogOpen} onClose={() => setPasswordDialogOpen(false)}>

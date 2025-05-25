@@ -63,9 +63,6 @@ const MainLayout = ({children}) => {
     fetchUserData();
   }, [currentUser]);
   
-  // Determinar qué nombre mostrar
-  // const displayName = userData?.nombre || currentUser?.displayName || currentUser?.email;
-
     const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
@@ -187,17 +184,20 @@ const drawer = (
         </Drawer>
       </Box>
       
-      <Box
-        component="main"
-        sx={{ 
-          flexGrow: 1, 
-          p: 3, 
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          marginTop: '64px' // Altura del AppBar
-        }}
-      >
-        {children}
-      </Box>
+<Box
+  component="main"
+  sx={{ 
+    flexGrow: 1, 
+    p: { xs: 1, sm: 3 }, 
+    width: { sm: `calc(100% - ${drawerWidth}px)` },
+    maxWidth: '100vw',
+    marginTop: '64px',
+    overflow: 'hidden',
+    boxSizing: 'border-box'
+  }}
+>
+  {children}
+</Box>
     </Box>
   );
 };
