@@ -251,13 +251,13 @@ const OrderSummary = ({ order: initialOrder }) => {
             <Box sx={{ textAlign: 'center' }}>
               <LunchDiningIcon color='comida' sx={{ fontSize: 40 }} />
               <Typography variant="h5">{totals.COMIDA}</Typography>
-              <Typography variant="body2" color="textSecondary">Comidas</Typography>
+              <Typography variant="subtitle2" color="textSecondary">Comida</Typography>
             </Box>
             
             <Box sx={{ textAlign: 'center' }}>
               <LocalCafeIcon color="bebida" sx={{ fontSize: 40 }} />
               <Typography variant="h5">{totals.BEBIDA}</Typography>
-              <Typography variant="body2" color="textSecondary">Bebidas</Typography>
+              <Typography variant="subtitle2" color="textSecondary">Bebida</Typography>
             </Box>
           </Box>
           
@@ -273,7 +273,7 @@ const OrderSummary = ({ order: initialOrder }) => {
           </Fab>
           <Fab 
             size='medium' 
-            color="secondary"
+            color="primary"
             aria-label='compartir' 
             onClick={handleShareImage}
           >
@@ -283,63 +283,102 @@ const OrderSummary = ({ order: initialOrder }) => {
         </Box>
       </Box>
       
-      <TableContainer component={Paper}>
-        <Table aria-label="tabla de resumen de productos">
-          <TableHead>
-            <TableRow>
-              <TableCell><strong>Producto</strong></TableCell>
-              <TableCell align="center"><strong>Cantidad</strong></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {productSummary.length > 0 ? (
-              productSummary.map((product, index) => (
-                <TableRow key={index}>
-                  <TableCell>{product.nombre}</TableCell>
-                  <TableCell align="center">
-                    <Chip 
-                      label={product.cantidad}
-                      color="default"
-                      size="small"
-                    />
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={4} align="center">
-                  <Typography variant="body2" color="textSecondary">
-                    No hay productos en este pedido
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            <Paper sx={{backgroundColor: '#f5f5f5',display:'flex', justifyContent:'space-between'}}>
+            <Box>
+              <Typography><strong>Producto</strong></Typography>
+            </Box>
+            <Box>
+              <Typography><strong>Cantidad</strong></Typography>
+            </Box>
+            </Paper>
 
-      <Divider sx={{ my: 2 }} />
+                {productsByType.comida.length > 0 ? (
+                  productsByType.comida.map((producto, index) => (
+                    <Box 
+                          key={index} 
+                          sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            py: 1,
+                            borderBottom: '1px solid rgba(224, 224, 224, 1)',
+                            '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.04)' }
+                          }}
+                        >
+                          <Box sx={{ width: '85%', pl: 2 }}>
+                            <Typography variant='subtitle2'>{producto.nombre}</Typography>
+                          </Box>
+                          <Box sx={{ width: '15%', textAlign: 'center' }}>
+                          <Typography variant='subtitle2'>{producto.cantidad}</Typography>
+                          </Box>
+                        </Box>                   
+                  ))
+                ) : (
+                  <Box>
+                    <Typography >
+                      No hay comida en este pedido
+                    </Typography>
+                  </Box>
+                )}
+
+                {productsByType.bebida.length > 0 ? (
+                  productsByType.bebida.map((producto, index) => (
+                                      <Box 
+                          key={index} 
+                          sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            py: 1,
+                            borderBottom: '1px solid rgba(224, 224, 224, 1)',
+                            '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.04)' }
+                          }}
+                        >
+                          <Box sx={{ width: '85%', pl: 2 }}>
+                            <Typography variant='subtitle2'>{producto.nombre}</Typography>
+                          </Box>
+                          <Box sx={{ width: '15%', textAlign: 'center' }}>
+                          <Typography variant='subtitle2'>{producto.cantidad}</Typography>
+                          </Box>
+                        </Box>         
+                  ))
+                ) : (
+                  <Box>
+                    <Typography >
+                      No hay bebida en este pedido
+                    </Typography>
+                  </Box>
+                )}
             
-      <Card sx={{ mb: 4 }}>
-        <CardContent>
-          <Typography textAlign='center' variant="body1" gutterBottom>
-            <strong>Participantes ({order?.usuarios?.length || 0})</strong>
-          </Typography>
-          
-          <List dense>
-            {order?.usuarios?.map((usuario, index) => (
-              <ListItem key={index}>
-                <ListItemButton onClick={() => handleUserClick(usuario)}>
-                  <ListItemText 
-                    primary={usuario.nombre || usuario.id} 
-                    secondary={`${usuario.productos?.length || 0} productos seleccionados`} 
-                  />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        </CardContent>
-      </Card>
+            
+
+         <Paper sx={{mt: 4, backgroundColor: '#f5f5f5', display:'flex', justifyContent:'center'}}>
+            <Box>
+              <Typography><strong>Participantes ({order?.usuarios?.length || 0})</strong></Typography>
+            </Box>
+            </Paper>
+
+            {order?.usuarios?.sort((a, b) => a.nombre.localeCompare(b.nombre)).map((usuario, index) => (
+                       <Box 
+                          key={index}
+                          onClick={() => handleUserClick(usuario)}
+                          sx={{
+                            display: 'flex',
+                            flexDirection:'column',
+                            justifyItems:'center',
+                            py: 1,
+                            borderBottom: '1px solid rgba(224, 224, 224, 1)',
+                            '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.04)' }
+                          }}
+                        >
+                          <Box sx={{ textAlign: 'center' }}>
+                            <Typography><strong>{usuario.nombre}</strong></Typography>
+                          </Box>
+                          <Box sx={{ textAlign: 'center' }}>
+                          <Typography variant='subtitle2'>{`${usuario.productos?.length || 0} productos`}</Typography>
+                          </Box>
+                        </Box>         
+                  ))}
+
+
       
       {/* Diálogo para mostrar productos de un participante */}
       <Dialog
@@ -349,23 +388,32 @@ const OrderSummary = ({ order: initialOrder }) => {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle id="user-products-dialog-title">
+        <DialogTitle id="user-products-dialog-title" sx={{backgroundColor: '#f5f5f5'}}>
           <Typography variant="h6" component="div" align="center">
-            Productos seleccionados por {selectedUser?.nombre || selectedUser?.id}
+            <strong>{selectedUser?.nombre || selectedUser?.id}</strong>
           </Typography>
         </DialogTitle>
-        <DialogContent dividers>
-          {selectedUser && selectedUser.productos && selectedUser.productos.length > 0 ? (
-            <List>
-              {selectedUser.productos.map((producto, index) => (
-                <ListItem key={index}>
-                  <ListItemText
-                    primary={producto.nombre}
-                    secondary={producto.tipo}
-                  />
-                </ListItem>
-              ))}
-            </List>
+        <DialogContent>
+          {selectedUser && selectedUser.productos && selectedUser.productos.length > 0 ? (        
+              selectedUser.productos.sort((a, b) => a.nombre.localeCompare(b.nombre)).map((producto, index) => (
+                        <Box 
+                          key={index} 
+                          sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            justifyContent:'center',
+                            py: 1,
+                            borderBottom: '1px solid rgba(224, 224, 224, 1)',
+                            '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.04)' }
+                          }}>
+
+                            <>{producto.tipo=="comida" ? ( <LunchDiningIcon color='comida'sx={{ position:'absolute', left:2}}/> ): (<LocalCafeIcon color='bebida' sx={{position:'absolute', left:2}}/>)}</>
+                            <Typography >{producto.nombre}</Typography>
+                          </Box>
+                  
+
+              ))
+            
           ) : (
             <Typography align="center" color="textSecondary">
               Este participante no ha seleccionado productos
@@ -373,7 +421,10 @@ const OrderSummary = ({ order: initialOrder }) => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} color="secondary">
+          <Button onClick={handleCloseDialog} 
+                  color="secondary" 
+                  variant="contained"
+                  sx={{borderRadius:2}}>
             CERRAR
           </Button>
         </DialogActions>
@@ -413,7 +464,7 @@ const OrderSummary = ({ order: initialOrder }) => {
             Desayuno Mecaformas 3D
           </Typography>
           <Typography variant="h4" color="secondary">
-             {new Date().toLocaleDateString()} 09:30 
+             Llegada: {order.horaLlegada}
           </Typography>
           <Typography variant="h4" color="black">
             Mesa para: {order?.usuarios?.length || 0} personas

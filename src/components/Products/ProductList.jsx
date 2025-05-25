@@ -170,7 +170,7 @@ const ProductList = ({ category, toggleSelection, selectedProducts }) => {
                      toggleSelection(product);
                    }
                  }}
-                elevation={isProductSelected(product.id) ? 3 : 1}
+                elevation={isProductSelected(product.id) ? 4 : 1}
                 sx={{
                   height: '100%',
                   width: '100%',
@@ -179,8 +179,8 @@ const ProductList = ({ category, toggleSelection, selectedProducts }) => {
                 }}
               >
                 <CardContent> 
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="h6" component="h3" noWrap>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding:0}}>
+                    <Typography  fontFamily='Verdana' noWrap>
                       {product.nombre}
                     </Typography>
                     <IconButton 
@@ -189,7 +189,7 @@ const ProductList = ({ category, toggleSelection, selectedProducts }) => {
                         e.stopPropagation();
                         handleToggleFavorite(product);
                       }}
-                      color="warning"
+                      color="favoritos"
                       size="small"
                     >
                       {favorites.includes(product.id) ? <StarIcon /> : <StarBorderIcon />}
@@ -197,12 +197,14 @@ const ProductList = ({ category, toggleSelection, selectedProducts }) => {
                   </Box>
                   <Box sx={{ mt: 1, display: 'flex', justifyContent: 'left', alignItems: 'center' }}>
                     <Chip 
+                      
                       icon={product.tipo === 'comida' ? <LunchDiningIcon /> : <LocalCafeIcon />}
                       label={product.tipo}
                       color={product.tipo === 'comida' ? 'comida' : 'bebida'}
                       size="small"
                       variant="outlined"
-                      sx={{ mr: 1 }}
+                      sx={{ padding:0.4, border: isProductSelected(product.id) ? '2px solid #3f51b5' : '1px solid rgb(10, 10, 10)'}}
+                      
                     />
                   </Box>                 
                 </CardContent>

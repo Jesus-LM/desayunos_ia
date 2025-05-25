@@ -1,4 +1,4 @@
-import React from 'react';
+// src/components/Layout/MainLayout.jsx
 import { useEffect,useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -54,8 +54,12 @@ const MainLayout = ({children}) => {
         } finally {
           setLoading(false);
         }
-      }
-    };
+        } else {
+      // Si no hay usuario, cerrar el perfil
+      setProfileOpen(false);
+      setUserData(null);
+    }
+  };
     fetchUserData();
   }, [currentUser]);
   

@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { 
   Typography, Container, Box, Grid, Card, CardContent, 
-  CardActionArea, CircularProgress, IconButton,DialogTitle,
+  CardActionArea, CircularProgress, Fab ,DialogTitle,
   DialogActions,DialogContent,DialogContentText,Dialog,
-  Button, Chip, Divider 
+  Button, Chip, Divider,
+  IconButton
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -99,13 +100,15 @@ const OrderList = () => {
 
   return (
     <Container maxWidth="md" sx={{ mt: 1, mb: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 4}}>
         <Button 
           variant="contained" 
           color="primary" 
           startIcon={<AddCircleOutlineIcon />}
           component={RouterLink} 
           to="/orders/create"
+          fullWidth
+          sx={{borderRadius:2}}
           
         >
           <Typography  fontSize='large' component='h2'>
@@ -127,28 +130,27 @@ const OrderList = () => {
         <Grid container spacing={3}>
           {orders.map((order) => (
             <Grid size={{xs:12, sm:6, md:4}} key={order.id}>
-              <Card elevation={3} sx={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                <IconButton 
+              <Card elevation={5} sx={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                {order.creadoPor==currentUser.email ? (<Fab
+                  size='small'
+                  color='secondary'           
                   aria-label="eliminar pedido" 
                   sx={{ 
+                    
                     position: 'absolute', 
-                    top: 8, 
-                    right: 8, 
-                    color: 'red',
-                    zIndex: 1,
-                    bgcolor: 'background.paper',
-                    '&:hover': { bgcolor: 'error.lighter' }
+                    top: 4, 
+                    right: 4, 
                   }}
                   onClick={(e) => handleDeleteClick(e, order)}
                 >
                   <ClearIcon/>
-                </IconButton>
+                </Fab>) : <></>}
                 <CardActionArea 
                   component={RouterLink} 
                   to={`/orders/${order.id}`}
                   sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
                 >
-                  <CardContent sx={{ flexGrow: 1 }}>
+                  <CardContent sx={{ flexGrow: 0 }}>
                     <Typography color="primary" display="flex" justifyContent="center" variant="h4" component="h2" gutterBottom noWrap>
                       {order.nombre}
                     </Typography>
@@ -210,10 +212,18 @@ const OrderList = () => {
           justifyContent:"space-between",
 
         }}>
-          <Button  onClick={handleCloseDeleteDialog} color="primary">
+          <Button onClick={handleCloseDeleteDialog} 
+                  variant="contained"
+                  color="primary"
+                  sx={{borderRadius:4}}>
             Cancelar
           </Button>
-          <Button onClick={handleConfirmDelete} color="error" autoFocus>
+          <Button onClick={handleConfirmDelete} 
+                  variant="contained" 
+                  color="error" 
+                  autoFocus
+                  sx={{borderRadius:4}}>
+                  
             Eliminar
           </Button>
         </DialogActions>

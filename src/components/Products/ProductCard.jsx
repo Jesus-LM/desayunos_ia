@@ -43,6 +43,7 @@ const ProductCard = ({ product, isSelected, onToggleSelect }) => {
       onClick={onToggleSelect}
       sx={{
         height: '100%',
+        width:'100%',
         display: 'flex',
         flexDirection: 'column',
         cursor: 'pointer',
@@ -56,10 +57,10 @@ const ProductCard = ({ product, isSelected, onToggleSelect }) => {
       }}
       elevation={isSelected ? 4 : 1}
     >
-      <CardContent sx={{ flexGrow: 1, pb: 1 }}>
+      <CardContent sx={{ flexGrow: 0, flexShrink:0, pb: 1 }}>
         <Typography 
-          variant="h6" 
-          component="h3" 
+           
+           
           gutterBottom
           sx={{ 
             fontSize: '1rem',

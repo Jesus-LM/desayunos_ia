@@ -3,8 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   Container, IconButton, Typography, Box, CircularProgress, Tabs, Tab,
   Button, Card, CardContent, Divider, List, ListItem, ListItemText,
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  ListItemIcon
+  Dialog, DialogTitle, DialogContent, DialogActions, Fab,
+  ListItemIcon,Paper
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LunchDiningIcon from '@mui/icons-material/LunchDining';
@@ -140,69 +140,93 @@ useEffect(() => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 0, mb: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, ml:0,mr:0 }}>
-        <Box>       
-         <IconButton 
+      <Box sx={{ display: 'flex',  justifyContent: 'center', alignItems: 'center', mb: 3, ml:0, mr:0 }}>
+               
+         <Fab 
+            sx={{
+              position: 'absolute',              
+              left: 4
+            }}
             aria-label="atras" 
-            color='primary'       
+            size='small'
+            color='secondary'       
             onClick={() => navigate('/orders')}>
-            <ArrowBackIcon fontSize="large" color='black'/>         
-        </IconButton>
-      </Box>
+            <ArrowBackIcon fontSize="large"/>         
+        </Fab>
+     
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography color='black' variant="h4" component="h1" align='center'>
-            {order?.nombre}
+          <Typography color='primary' variant="h4" component="h1" align='center'>
+            <strong>{order?.nombre}</strong>
           </Typography>
         </Box>
-        <Box>
-        <IconButton 
+        {order.creadoPor==currentUser.email ? (
+        
+        <Fab 
+          color='primary'
+          size='small'
+          sx={{
+            
+            position: 'absolute',              
+            right: 4
+          }}
           aria-label="resumen" 
           onClick={toggleSummary}
         >
-            <ReceiptLongIcon color="primary" fontSize="large" />
-        </IconButton>
-      </Box>
+            <ReceiptLongIcon  fontSize="large" />
+        </Fab> ):<Box></Box>}
     </Box>
-    <Divider color='black'  sx={{ mt: 0, mb: 2 }} />
-     <Box >
-              <Typography color="black" align="center" variant="h5" gutterBottom>
-                Mi Selección
-              </Typography>
-              <Divider sx={{ my: 0, fontWeight:"bold", }} />
-            
-              {selectedProducts.length > 0 ? (
-                <Card >
-                <List >
-                  {selectedProducts .map((product, index) => (
-                    <ListItem  key={index}>
-                      <ListItemIcon 
-                        edge='start'
-                        onClick={(e) => {
-                        e.stopPropagation();
-                        toggleProductSelection(product);
-                      }}
-                        aria-label="eliminar"
-                        sx={{mr:0,color:'red'}}
-                      >
-                        <ClearIcon  />
+    
+              
+            <Box>
+              <Typography
+                mb='2' textAlign="center" variant='h5'><strong>Mi Selección</strong>
+                </Typography>
+            </Box>
+                <Card sx={{mt:1,
+                  borderRadius:'5',
+                  border: '2px solid #3f51b5',
+                }} elevation={5}
+                >
 
-                      </ListItemIcon>
-                      <ListItemText sx={{margin:0}}
-                        primary={product.nombre} 
-                        />
-                      
-                    </ListItem>
-                   
-                  ))}
+              {selectedProducts.length > 0 ? (
+                selectedProducts.sort((a, b) => a.nombre.localeCompare(b.nombre)).map((producto, index) => (
+                        <Box 
+                          key={index} 
+                          sx={{ 
+                            backgroundColor:'white',
+                            display: 'flex', 
+                            alignItems: 'center',
+                            py:0.1,
+                            my:0
+                          }}
+                        >
+                          <Box sx={{
+                            width: '10%',
+                            
+                          }}>
+                          <ClearIcon   
+                            sx={{ verticalAlign: 'middle'}}
+                            color="secondary" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleProductSelection(producto);
+                            }} 
+                          />
+
+                          </Box>
+                          <Box sx={{ width: '90%' }}>
+                            <Typography >{producto.nombre}</Typography>
+                        </Box>                   
+                       </Box>
+                  ))
                   
-                </List>
-                </Card>
-              ) : (
-                <Typography align='center'>
+                ) : (
+                  <Typography align='center'>
                   Aun no has seleccionado ningún producto
                 </Typography>
               )}
-            </Box>
+          </Card>
+           
       <Box sx={{ width: '100%', mt:1}}>
         <Box sx={{ borderBottom: 2, borderColor: 'divider' }}>
           <Tabs value={activeTab} onChange={handleTabChange} centered aria-label="categorías de productos">
@@ -255,7 +279,12 @@ useEffect(() => {
           <OrderSummary order={order} />
         </DialogContent>
         <DialogActions>
-          <Button color="secondary" onClick={toggleSummary}>CERRAR</Button>
+          <Button color="secondary" 
+                  variant="contained" 
+                  sx={{borderRadius:2}} 
+                  onClick={toggleSummary}>
+                    CERRAR
+          </Button>
         </DialogActions>
       </Dialog>
     </Container>

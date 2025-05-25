@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+// src/components/UI/UserProfile.jsx
+
+import { useState, useEffect } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Avatar, TextField, Button, Box, Typography,
@@ -126,6 +128,7 @@ const UserProfile = ({ open, onClose, user, loading }) => {
     const handleLogout = async () => {
       try {
         await logout();
+        onClose()
         navigate('/login');
       } catch (error) {
         console.error("Error al cerrar sesión:", error);
@@ -219,13 +222,18 @@ const UserProfile = ({ open, onClose, user, loading }) => {
       <DialogActions sx={{display:'flex', justifyContent:'space-between'}}>
         {editMode ? (
           <>
-            <Button color="secondary" onClick={() => {setEditMode(false); formData.nombre=user.nombre}}>Cancelar</Button>
+            <Button variant="contained" color="secondary" onClick={() =>  {
+              setEditMode(false); 
+              setFormData({...formData, nombre: user.nombre});
+             }}>
+              Cancelar
+            </Button>
             <Button variant="contained" onClick={handleUpdateProfile}>Guardar</Button>
           </>
         ) : (
             <>
-                <Button color="secondary"  onClick={() => handleLogout()}>Cerrar Sesión</Button>
-                <Button variant="outlined" onClick={() => setEditMode(true)}>Editar Perfil</Button>
+                <Button variant="contained" color="secondary"  onClick={() => handleLogout()}>Cerrar Sesión</Button>
+                <Button variant="contained" onClick={() => setEditMode(true)}>Editar Perfil</Button>
             </>
         )}
       </DialogActions>

@@ -35,7 +35,7 @@ export const getUsuario = async (email) => {
   }
 };
 
-// En firestore.js - Añade esta función
+
 export const asignarRolUsuario = async (email, rol) => {
   try {
     const userRef = doc(db, 'USUARIOS', email);
@@ -146,9 +146,8 @@ export const getProductosFavoritos = async (email) => {
 // ---- PEDIDOS ----
 
 // Crear un nuevo pedido
-export const crearPedido = async (nombrePedido, usuarioEmail, productos = []) => {
+export const crearPedido = async (nombrePedido, usuarioEmail, productos = [],horaLlegada) => {
   try {
-    console.log(`Intentando crear pedido: ${nombrePedido} para usuario: ${usuarioEmail}`);
     
     // Intentar obtener el usuario (si no existe usaremos solo el email)
     let nombreUsuario = usuarioEmail;
@@ -167,6 +166,8 @@ export const crearPedido = async (nombrePedido, usuarioEmail, productos = []) =>
     const nuevoPedido = {
       nombre: nombrePedido,
       fechaCreacion: serverTimestamp(),
+      creadoPor: usuarioEmail,
+      horaLlegada:horaLlegada,
       usuarios: [{
         id: usuarioEmail,
         nombre: nombreUsuario,
@@ -175,7 +176,6 @@ export const crearPedido = async (nombrePedido, usuarioEmail, productos = []) =>
     };
     
     const docRef = await addDoc(pedidoRef, nuevoPedido);
-    console.log("Pedido creado con ID:", docRef.id);
     
     return docRef.id;
   } catch (error) {
@@ -196,7 +196,9 @@ export const getPedidos = async () => {
       return {
         id: doc.id,
         nombre: data.nombre,
+        creadoPor: data.creadoPor,
         fechaCreacion: data.fechaCreacion,
+        horaLlegada: data.horaLlegada,
         usuarios: data.usuarios?.map(u => ({
           id: u.email,
           nombre: u.nombre,
@@ -223,7 +225,9 @@ export const getPedido = async (pedidoId) => {
       return {
         id: docSnap.id,
         nombre: data.nombre,
+        creadoPor:data.creadoPor,
         fechaCreacion: data.fechaCreacion,
+        horaLlegada:data.horaLlegada,
         usuarios:  data.usuarios?.map(u => ({
           id: u.email,
           nombre: u.nombre,
